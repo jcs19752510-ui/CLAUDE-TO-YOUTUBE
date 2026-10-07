@@ -15,6 +15,7 @@ G = ROOT / "그래픽" / "영상_mp4"          # 이름은 이 폴더 기준, �
 # ───────────────────────── 챕터별 그래픽 설정표 (여기만 고치면 됨) ─────────────────────────
 #   lead  : 챕터가 시작될 때 (문단 전) 재생할 그래픽/챕터 카드 목록
 #   after : {문단 번호: [그래픽...]}  해당 문단 음성 뒤에 재생
+#   over  : {문단 번호: 그래픽} 해당 문단 음성과 동시에 재생(그래픽이 그 문단의 화면이 됨)
 #   post  : 챕터 마지막 문단 뒤에 재생
 #   slot  : 카드에 표시할 '화면 녹화 자리' 설명 (없으면 표시 안 함)
 def _card(n):                            # 새 챕터 카드: 그래픽/영상_mp4/챕터카드/11_챕터NN_*.mp4 (다른 작업자가 추가 중)
@@ -41,7 +42,7 @@ CHAPTER_GFX = {
     "⑰": dict(lead=_card(17), after={}, post=[], slot="앱 화면 · 플러그인"),
     "⑱": dict(lead=_card(18), after={}, post=["17_안전수칙5가지"], slot=""),
     "⑲": dict(lead=_card(19), after={}, post=["18_실전1_코워크흐름"], slot="앱 화면 · 코워크 실전"),
-    "⑳": dict(lead=_card(20), after={8: ["19_실전2_코드탭4단계"], 9: ["09_5줄요약"]}, post=[], slot="앱 화면 · Code 탭 계산기 완성"),   # p08=요구·플랜·수정·확인 네 단계 낭독 뒤, p09=5줄 요약 낭독 뒤
+    "⑳": dict(lead=_card(20), after={8: ["19_실전2_코드탭4단계"]}, over={9: "09_5줄요약"}, post=[], slot="앱 화면 · Code 탭 계산기 완성"),   # p08=네 단계 낭독 뒤 / p09=5줄 요약 낭독과 동시에(over) 재생
 }
 
 # 옛(수정 전) 글로 만든 음성: 파일 내용(sha1)이 아래와 같으면 아직 재생성 전이므로 쓰지 않고 무음 카드로 대신한다.
@@ -108,6 +109,13 @@ for ch, p0, p1 in PLAY_ORDER:
             MISSING.append(name)
         if vpath is None:
             d = len(spoken[ch][pi]) / EST_CPS + PAD
+        ov = cfg.get("over", {}).get(pi)
+        if ov and vpath:                                 # 그래픽을 문단 음성과 함께 재생
+            gl = gfx([ov])
+            if gl:
+                dg = max(gl[0][1], d)
+                segs.append(("gfxa", str(gl[0][0]), dg, vpath, t, text)); t += dg
+                continue
         label = f"화면 녹화 자리:{cfg['slot']}" if cfg["slot"] else ""
         label = "|".join(x for x in (label, vlabel) if x)
         segs.append(("card", dict(tag=f"{ch} {titles[ch]}", tm="", cap=text, src=label), d, vpath, t)); t += d
@@ -134,6 +142,10 @@ for i, s in enumerate(segs):
         ain = ["-i", s[3]] if s[3] else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", f"{s[2]:.3f}", "-i", str(S / f"c{i:03d}.png")] + ain + \
               ["-vf", "format=yuv420p", "-af", "apad", "-t", f"{s[2]:.3f}", "-shortest"] + VOPT + AOPT + [str(out)]
+    elif s[0] == "gfxa":
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-i", s[1], "-i", s[3],
+               "-vf", f"scale={W}:{H},fps={FPS},format=yuv420p,tpad=stop_mode=clone:stop_duration=3", "-af", "apad",
+               "-t", f"{s[2]:.3f}"] + VOPT + AOPT + [str(out)]
     else:
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-i", s[1], "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
                "-vf", f"scale={W}:{H},fps={FPS},format=yuv420p", "-t", f"{s[2]:.3f}", "-shortest"] + VOPT + AOPT + [str(out)]
@@ -150,8 +162,9 @@ for ch, p0, _ in PLAY_ORDER:
 (OUT / "챕터타임라인.txt").write_text("\n".join(tl) + "\n", encoding="utf8")
 cues, n = [], 1
 for s in segs:
-    if s[0] != "card": continue
-    t0, dur, text = s[4], s[2] - PAD, s[1]["cap"]
+    if s[0] not in ("card", "gfxa"): continue
+    t0, dur = s[4], s[2] - PAD
+    text = s[1]["cap"] if s[0] == "card" else s[5]
     sents = [x.strip() for x in re.split(r"(?<=[.?!])\s+", text) if x.strip()]
     tot = sum(len(x) for x in sents) or 1; acc = 0
     for x in sents:
