@@ -1,0 +1,100 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(fonts/black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(fonts/noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(fonts/noto-sans-kr-korean-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#222}
+.t{width:1280px;height:720px;position:relative;overflow:hidden;font-family:NK,sans-serif;margin:0 0 20px}
+
+.bh{font-family:BH,NK,sans-serif;font-weight:400}
+/* ---------- A ---------- */
+#A{background:radial-gradient(900px 600px at 78% 40%,#3a2012 0%,#0b1020 62%),#0b1020}
+#A .glow{position:absolute;right:-120px;top:-120px;width:620px;height:620px;border-radius:50%;background:radial-gradient(#ff7a3d55,#0000 70%)}
+#A .win{position:absolute;left:36px;top:70px;width:560px;height:430px;background:#f7f8fb;border-radius:22px;box-shadow:0 30px 70px #000a,0 0 0 4px #ffffff22;transform:rotate(-3deg)}
+#A .bar{height:46px;background:#e4e7ee;border-radius:22px 22px 0 0;display:flex;align-items:center;gap:10px;padding:0 20px}
+#A .dot{width:15px;height:15px;border-radius:50%}
+#A .ttl{padding:22px 30px 0;font-weight:900;font-size:34px;color:#1b2333}
+#A .row{margin:16px 30px 0;display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-radius:14px;background:#fff;border:2px solid #dfe3ec;font-weight:700;font-size:30px;color:#2a3347}
+#A .res{margin:20px 30px 0;padding:18px 24px;border-radius:16px;background:#12b76a;color:#fff;display:flex;justify-content:space-between;align-items:center}
+#A .res b{font-size:30px;font-weight:900}#A .res i{font-style:normal;font-size:50px;font-weight:900}
+#A .term{position:absolute;left:34px;top:552px;width:470px;background:#0d1117;border-radius:16px;border:3px solid #ff7a3d;padding:16px 22px;font-family:NK;font-weight:700;font-size:27px;color:#e6edf3;box-shadow:0 18px 40px #000a;transform:rotate(-3deg)}
+#A .term .p{color:#ff7a3d}
+#A .term .c{display:inline-block;width:14px;height:28px;background:#ff7a3d;vertical-align:-4px;margin-left:4px}
+#A .yr{position:absolute;right:34px;top:30px;background:#ffd23f;color:#111;font-weight:900;font-size:40px;padding:6px 24px;border-radius:40px}
+#A .h1{position:absolute;left:628px;top:118px;font-size:150px;line-height:1.02;color:#fff;text-shadow:0 6px 0 #000a}
+#A .h1 em{font-style:normal;color:#ff7a3d}
+#A .h2{position:absolute;left:632px;top:405px;font-size:92px;color:#ffd23f;text-shadow:0 5px 0 #000a;line-height:1}
+#A .badge{position:absolute;left:632px;top:540px;background:#fff;color:#0b1020;font-weight:900;font-size:54px;padding:8px 30px;border-radius:14px;transform:rotate(-2deg);box-shadow:0 8px 0 #ff7a3d}
+#A .rib{position:absolute;right:0;bottom:36px;background:#12b76a;color:#fff;font-weight:900;font-size:36px;padding:12px 30px 12px 44px;border-radius:40px 0 0 40px;box-shadow:0 8px 20px #0008}
+/* ---------- B ---------- */
+#B{background:#ffd23f}
+#B:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#0000 0 60px,#ffffff30 60px 120px)}
+#B .big{position:absolute;left:44px;top:56px;font-size:215px;line-height:1;color:#111}
+#B .big em{font-style:normal;color:#e8431c;font-size:240px}
+#B .sub{position:absolute;left:48px;top:330px;font-size:92px;color:#111;line-height:1.05;background:#fff;padding:6px 28px;border-radius:16px;box-shadow:10px 10px 0 #111}
+#B .sub2{position:absolute;left:48px;top:480px;font-size:78px;color:#fff;background:#111;padding:6px 28px;border-radius:16px;transform:rotate(-1.5deg)}
+#B .card{position:absolute;right:30px;top:60px;width:370px;background:#fff;border-radius:22px;border:6px solid #111;box-shadow:12px 12px 0 #111;transform:rotate(4deg);overflow:hidden}
+#B .card .bar{background:#111;height:42px;display:flex;align-items:center;gap:8px;padding:0 16px}
+#B .card .dot{width:13px;height:13px;border-radius:50%}
+#B .card .b{padding:22px 24px;font-weight:900;color:#111}
+#B .card .l{font-size:26px;color:#555;font-weight:700;margin-top:10px}
+#B .card .v{font-size:36px;margin-bottom:4px}
+#B .card .net{margin-top:16px;background:#12b76a;color:#fff;border-radius:14px;padding:12px 18px;font-size:30px}
+#B .card .net b{display:block;font-size:46px;line-height:1.1}
+#B .tm{position:absolute;right:40px;bottom:44px;width:380px;background:#0d1117;border-radius:14px;color:#e6edf3;font-weight:700;font-size:25px;padding:14px 20px;border:4px solid #111;box-shadow:8px 8px 0 #111;transform:rotate(-2deg)}
+#B .tm .p{color:#ff7a3d}
+#B .tag{position:absolute;left:54px;bottom:40px;font-size:44px;font-weight:900;color:#111;background:#fff;padding:6px 22px;border-radius:12px;border:4px solid #111}
+/* ---------- C ---------- */
+#C{background:linear-gradient(135deg,#1a0a0a,#3b0d0d 55%,#0b0b12)}
+#C .warn{position:absolute;left:46px;top:40px;width:170px;height:150px}
+#C .warn svg{width:100%;height:100%}
+#C .k{position:absolute;left:236px;top:48px;font-size:44px;font-weight:900;color:#ff6b6b;background:#fff1;border:3px solid #ff6b6b;padding:8px 24px;border-radius:50px}
+#C .h1{position:absolute;left:46px;top:208px;font-size:170px;line-height:1;color:#fff;text-shadow:0 6px 0 #000a}
+#C .h1 em{font-style:normal;color:#ff4d4d}
+#C .h2{position:absolute;left:50px;top:420px;font-size:100px;color:#ffd23f;line-height:1}
+#C .list{position:absolute;right:44px;top:70px;width:410px}
+#C .it{display:flex;align-items:center;gap:16px;background:#ffffff14;border:3px solid #ffffff44;border-radius:18px;padding:16px 20px;margin-bottom:18px;font-size:34px;font-weight:900;color:#fff}
+#C .n{flex:none;width:58px;height:58px;border-radius:50%;background:#ff4d4d;color:#fff;font-size:36px;display:flex;align-items:center;justify-content:center}
+#C .tag{position:absolute;left:50px;bottom:44px;background:#12b76a;color:#fff;font-weight:900;font-size:46px;padding:10px 30px;border-radius:14px;box-shadow:0 8px 0 #0a7a47}
+#C .tm{position:absolute;right:44px;bottom:50px;width:410px;background:#0d1117;border:3px solid #ff7a3d;border-radius:14px;color:#e6edf3;font-weight:700;font-size:25px;padding:14px 20px}
+#C .tm .p{color:#ff7a3d}
+</style></head><body>
+
+<div class="t" id="A"><div class="glow"></div>
+  <div class="yr">2026</div>
+  <div class="win"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span></div>
+    <div class="ttl">부업 수익 계산기</div>
+    <div class="row"><span>수입</span><span>3,200,000</span></div>
+    <div class="row"><span>비용</span><span>- 1,150,000</span></div>
+    <div class="res"><b>순이익</b><i>2,050,000원</i></div></div>
+  <div class="term"><span class="p">$</span> claude<br><span class="p">&gt;</span> 수익 계산기 만들어 줘<span class="c"></span></div>
+  <div class="h1 bh">클로드<br><em>코드</em></div>
+  <div class="h2 bh">왕초보 사용법</div>
+  <div class="badge bh">20분 총정리</div>
+  <div class="rib">무료 치트시트</div>
+</div>
+
+<div class="t" id="B">
+  <div class="big bh">코딩 <em>0줄</em></div>
+  <div class="sub bh">5분 만에 웹페이지</div>
+  <div class="sub2 bh">클로드 코드 입문</div>
+  <div class="card"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span></div>
+    <div class="b"><div class="l">수입</div><div class="v">3,200,000</div><div class="l">비용</div><div class="v">- 1,150,000</div>
+    <div class="net">순이익<b>2,050,000원</b></div></div></div>
+  <div class="tm"><span class="p">$</span> claude<br><span class="p">&gt;</span> 만들어 줘</div>
+  <div class="tag">무료 치트시트</div>
+</div>
+
+<div class="t" id="C">
+  <div class="warn"><svg viewBox="0 0 100 90"><polygon points="50,4 96,86 4,86" fill="#ffd23f" stroke="#111" stroke-width="5" stroke-linejoin="round"/><rect x="46" y="30" width="8" height="30" rx="3" fill="#111"/><circle cx="50" cy="72" r="5" fill="#111"/></svg></div>
+  <div class="k">클로드 코드 입문</div>
+  <div class="h1 bh">초보 실수<br><em>3가지</em></div>
+  <div class="list">
+    <div class="it"><span class="n bh">1</span>너무 큰 요청</div>
+    <div class="it"><span class="n bh">2</span>전부 허용</div>
+    <div class="it"><span class="n bh">3</span>/clear 남발</div>
+  </div>
+  <div class="tm"><span class="p">$</span> claude<br><span class="p">&gt;</span> 이것만 피하세요</div>
+  <div class="tag">해결법 + 무료 치트시트</div>
+</div>
+</body></html>
