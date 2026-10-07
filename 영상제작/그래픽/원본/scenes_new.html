@@ -1,0 +1,126 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(fonts/black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(fonts/noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(fonts/noto-sans-kr-korean-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;background:#0b1020;overflow:hidden;font-family:NK,sans-serif;color:#fff}
+.s{position:absolute;inset:0;display:none;background:radial-gradient(1200px 800px at 85% 15%,#3a2012 0%,#0b1020 60%),#0b1020}
+.s.on{display:block}
+.bh{font-family:BH,NK,sans-serif;font-weight:400}
+.or{color:#ff7a3d}.yl{color:#ffd23f}.gr{color:#22c55e}.rd{color:#ff5a5a}
+@keyframes in{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes inl{from{opacity:0;transform:translateX(-80px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+.a{opacity:0;animation:in .7s ease forwards}
+.al{opacity:0;animation:inl .7s ease forwards}
+.ap{opacity:0;animation:pop .6s ease forwards}
+.hd{position:absolute;left:0;right:0;top:70px;text-align:center;font-size:92px;text-shadow:0 6px 0 #000a}
+.ft{position:absolute;left:0;right:0;bottom:50px;text-align:center;font-size:36px;color:#9aa6c2;font-weight:700}
+/* title */
+#title .l1{position:absolute;left:0;right:0;top:230px;text-align:center;font-size:190px;line-height:1.05;text-shadow:0 8px 0 #000a}
+#title .l2{position:absolute;left:0;right:0;top:520px;text-align:center;font-size:150px;line-height:1.05}
+#title .l3{position:absolute;left:50%;top:790px;transform:translateX(-50%);background:#ffd23f;color:#111;font-size:84px;padding:6px 60px;border-radius:70px}
+/* map */
+.map{position:absolute;left:110px;right:110px;top:300px;display:flex;gap:70px;align-items:stretch}
+.card{flex:1;background:#ffffff12;border:5px solid #ffffff33;border-radius:36px;padding:56px 44px;text-align:center;position:relative}
+.card .n{width:120px;height:120px;border-radius:50%;background:#ff7a3d;color:#fff;font-size:76px;display:flex;align-items:center;justify-content:center;margin:0 auto 32px}
+.card .t{font-size:62px;line-height:1.25;font-weight:900}
+.arrow{position:absolute;top:50%;font-size:90px;color:#ff7a3d}
+/* choose */
+.row{position:absolute;left:150px;right:150px;height:200px;display:flex;align-items:center;border-radius:36px;background:#ffffff12;border:5px solid #ffffff33;padding:0 60px;font-weight:900}
+.row .k{width:900px;font-size:58px;white-space:nowrap}
+.row .ar{font-size:80px;color:#ff7a3d;width:140px;text-align:center}
+.row .v{font-size:84px;white-space:nowrap}
+/* mistakes */
+.m{position:absolute;left:130px;right:130px;height:230px;display:flex;align-items:center;gap:36px;border-radius:36px;background:#ffffff12;border:5px solid #ff5a5a66;padding:0 50px}
+.m .n{flex:none;width:130px;height:130px;border-radius:50%;background:#ff5a5a;font-size:84px;display:flex;align-items:center;justify-content:center}
+.m .x{font-size:60px;font-weight:900;width:760px}
+.m .ar{font-size:70px;color:#ffd23f}
+.m .y{font-size:56px;font-weight:900;color:#22c55e;flex:1;line-height:1.25}
+/* steps */
+.st{position:absolute;left:150px;right:150px;height:230px;display:flex;align-items:center;gap:50px;border-radius:36px;background:#ffffff12;border:5px solid #ffffff33;padding:0 60px}
+.st .n{flex:none;width:130px;height:130px;border-radius:50%;background:#ff7a3d;font-size:84px;display:flex;align-items:center;justify-content:center}
+.st .t{font-size:84px;font-weight:900}
+/* keys */
+.kc{position:absolute;top:300px;width:540px;text-align:center}
+.key{display:inline-block;min-width:200px;background:#f4f6fb;color:#111;border-radius:28px;font-size:78px;padding:30px 44px;box-shadow:0 14px 0 #8a93a8,0 22px 40px #000a;font-weight:900;margin:0 10px}
+.kc .d{margin-top:70px;font-size:64px;font-weight:900}
+.kc .d small{display:block;font-size:40px;color:#9aa6c2;margin-top:12px;font-weight:700}
+/* cost */
+.cc{position:absolute;top:290px;width:540px;height:560px;border-radius:40px;background:#ffffff12;border:5px solid #ffffff33;padding:50px 36px;text-align:center}
+.cc .c{font-size:70px;font-weight:900;color:#ff7a3d;line-height:1.2}
+.cc .d{margin-top:34px;font-size:50px;font-weight:700;line-height:1.35}
+/* summary */
+.sm{position:absolute;left:170px;right:170px;height:150px;display:flex;align-items:center;gap:36px;border-radius:30px;background:#ffffff12;border:4px solid #ffffff33;padding:0 44px;font-size:56px;font-weight:900}
+.sm .n{flex:none;width:86px;height:86px;border-radius:50%;background:#22c55e;font-size:56px;display:flex;align-items:center;justify-content:center}
+/* end */
+.box{position:absolute;border:6px dashed #ffffff66;border-radius:30px;display:flex;align-items:center;justify-content:center;color:#ffffffaa;font-size:48px;font-weight:700;text-align:center}
+
+.mr{position:absolute;left:130px;right:130px;height:150px;display:flex;align-items:center;border-radius:30px;background:#ffffff12;border:4px solid #ffffff33;padding:0 44px}
+.mr .m1{width:560px;font-family:BH;font-size:56px;color:#ff7a3d}
+.mr .m2{flex:1;font-size:44px;font-weight:900;line-height:1.3}
+.mr.bad{border-color:#ff5a5a88}.mr.bad .m1{color:#ff5a5a}
+.tabc{position:absolute;top:240px;width:520px;height:640px;border-radius:40px;background:#ffffff12;border:5px solid #ffffff33;padding:50px 34px;text-align:center}
+.tabc .n{font-family:BH;font-size:84px;color:#ff7a3d;line-height:1}
+.tabc .k{margin-top:30px;font-size:58px;font-weight:900;color:#ffd23f;line-height:1.25}
+.tabc .d{margin-top:34px;font-size:44px;font-weight:700;line-height:1.4}
+.pl{position:absolute;top:260px;width:780px;height:520px;border-radius:44px;padding:56px 44px;text-align:center}
+.pl .h{font-family:BH;font-size:86px;line-height:1.15}.pl .d{margin-top:40px;font-size:48px;font-weight:900;line-height:1.4}
+</style></head><body>
+
+<div class="s" id="title">
+ <div class="l1 bh a" style="animation-delay:.2s">2026 <span class="or">클로드 코드</span> 사용법</div>
+ <div class="l2 bh a" style="animation-delay:.9s">챗·COWORK <span class="yl">15분 총정리</span></div>
+ <div class="l3 bh ap" style="animation-delay:1.6s">클로드 데스크탑 설치부터 · 터미널 없이</div></div>
+<div class="s" id="map"><div class="hd bh a" style="animation-delay:.1s">오늘 배울 <span class="or">3가지</span></div>
+ <div class="map">
+  <div class="card a" style="animation-delay:.6s"><div class="n bh">1</div><div class="t">설치와<br>로그인</div></div>
+  <div class="card a" style="animation-delay:1.6s"><div class="n bh">2</div><div class="t">세 개의 탭<br>챗·코워크·코드</div></div>
+  <div class="card a" style="animation-delay:2.6s"><div class="n bh">3</div><div class="t">코드 탭<br>사용법</div></div>
+ </div><div class="ft">앱 하나로 끝 · VS Code·터미널 필요 없음</div></div>
+<div class="s" id="install"><div class="hd bh a" style="animation-delay:.1s">설치는 <span class="or">3단계</span></div>
+ <div class="st al" style="top:240px;animation-delay:.7s"><div class="n bh">1</div><div class="t">공식 사이트에서 설치 파일 받기</div></div>
+ <div class="st al" style="top:520px;animation-delay:1.9s"><div class="n bh">2</div><div class="t">설치 후 앱 실행</div></div>
+ <div class="st al" style="top:800px;animation-delay:3.1s"><div class="n bh">3</div><div class="t">클로드 계정으로 로그인</div></div>
+ <div class="ft" style="bottom:20px">claude.com/download · 비슷한 이름의 다른 사이트 주의</div></div>
+<div class="s" id="plan"><div class="hd bh a" style="animation-delay:.1s">요금제 <span class="yl">알아두기</span></div>
+ <div class="pl a" style="left:130px;background:#22c55e22;border:5px solid #22c55e;animation-delay:.7s"><div class="h bh gr">챗 Chat</div><div class="d">모든 요금제에서 사용<br>(무료 포함)</div></div>
+ <div class="pl a" style="right:130px;background:#ff7a3d22;border:5px solid #ff7a3d;animation-delay:1.7s"><div class="h bh or">코드 · 코워크</div><div class="d">유료 요금제 필요<br>(Pro 이상)</div></div>
+ <div class="ft">요금은 바뀔 수 있어요 · 공식 요금 페이지에서 확인</div></div>
+<div class="s" id="tabs"><div class="hd bh a" style="animation-delay:.1s">결과물이 <span class="yl">뭐냐?</span></div>
+ <div class="tabc ap" style="left:100px;animation-delay:.8s"><div class="n">Chat</div><div class="k">답을 얻는다</div><div class="d">파일 접근 없는<br>일반 대화</div></div>
+ <div class="tabc ap" style="left:700px;animation-delay:2.6s"><div class="n">Cowork</div><div class="k">일을 맡긴다</div><div class="d">목표를 맡기면<br>검토할 결과물</div></div>
+ <div class="tabc ap" style="left:1300px;animation-delay:4.4s"><div class="n">Code</div><div class="k">계속 쓸 도구</div><div class="d">내 폴더의 파일을<br>직접 만들고 고침</div></div></div>
+<div class="s" id="first"><div class="hd bh a" style="animation-delay:.1s">코드 탭 <span class="or">첫 세션</span> 4가지</div>
+ <div class="st al" style="top:220px;height:180px;animation-delay:.7s"><div class="n bh">1</div><div class="t">환경: <span class="or">Local</span></div></div>
+ <div class="st al" style="top:430px;height:180px;animation-delay:2s"><div class="n bh">2</div><div class="t">폴더 선택 <span class="or">Select folder</span></div></div>
+ <div class="st al" style="top:640px;height:180px;animation-delay:3.3s"><div class="n bh">3</div><div class="t">모델 선택</div></div>
+ <div class="st al" style="top:850px;height:180px;animation-delay:4.6s"><div class="n bh">4</div><div class="t">권한 모드: <span class="gr">Manual</span></div></div></div>
+<div class="s" id="modes"><div class="hd bh a" style="animation-delay:.1s;top:40px;font-size:80px">권한 모드 <span class="or">5가지</span></div>
+ <div class="mr al" style="top:200px;animation-delay:.6s"><div class="m1">Manual</div><div class="m2">매번 물어봄 · <span class="gr">처음엔 이것</span></div></div>
+ <div class="mr al" style="top:370px;animation-delay:1.6s"><div class="m1">Accept edits</div><div class="m2">파일 수정은 자동 허락</div></div>
+ <div class="mr al" style="top:540px;animation-delay:2.6s"><div class="m1">Plan</div><div class="m2">계획만 · <span class="gr">큰일은 여기부터</span></div></div>
+ <div class="mr al" style="top:710px;animation-delay:3.6s"><div class="m1">Auto</div><div class="m2">위험한 행동만 배경에서 검사</div></div>
+ <div class="mr bad al" style="top:880px;animation-delay:4.6s"><div class="m1">Bypass permissions</div><div class="m2"><span class="rd">처음엔 쓰지 않기</span></div></div></div>
+<div class="s" id="five"><div class="hd bh a" style="animation-delay:.1s">더 잘 쓰는 <span class="yl">5가지</span></div>
+ <div class="sm al" style="top:230px;animation-delay:.6s"><div class="n bh">1</div>정지 버튼 · Esc 로 멈추고 방향 바꾸기</div>
+ <div class="sm al" style="top:410px;animation-delay:1.6s"><div class="n bh">2</div>@파일 · 이미지·PDF 끌어다 놓기</div>
+ <div class="sm al" style="top:590px;animation-delay:2.6s"><div class="n bh">3</div>CLAUDE.md 업무 지침서 만들기</div>
+ <div class="sm al" style="top:770px;animation-delay:3.6s"><div class="n bh">4</div>동그란 사용량 표시로 기억 공간 확인</div>
+ <div class="sm al" style="top:950px;animation-delay:4.6s;height:110px;font-size:50px"><div class="n bh" style="width:70px;height:70px;font-size:44px">5</div>일마다 새 세션 · 단축키 Ctrl+/</div></div>
+<div class="s" id="summary"><div class="hd bh a" style="animation-delay:.1s">오늘 <span class="yl">5줄 요약</span></div>
+ <div class="sm al" style="top:230px;animation-delay:.6s"><div class="n bh">1</div>앱 설치 → 로그인 (터미널·VS Code 불필요)</div>
+ <div class="sm al" style="top:410px;animation-delay:1.6s"><div class="n bh">2</div>답=챗 · 일 맡기기=코워크 · 계속 쓸 도구=코드</div>
+ <div class="sm al" style="top:590px;animation-delay:2.6s"><div class="n bh">3</div>코드 탭: Local → 폴더 → 모델 → 권한 모드</div>
+ <div class="sm al" style="top:770px;animation-delay:3.6s"><div class="n bh">4</div>처음엔 Manual, 큰일엔 Plan</div>
+ <div class="sm al" style="top:950px;animation-delay:4.6s;height:110px;font-size:50px"><div class="n bh" style="width:70px;height:70px;font-size:44px">5</div>멈추기 · @파일 · CLAUDE.md · 사용량 확인</div></div>
+<div class="s" id="end">
+ <div class="hd bh a" style="animation-delay:.1s;top:50px;font-size:84px">오늘 할 일 <span class="yl">딱 1개</span></div>
+ <div class="a" style="animation-delay:.7s;position:absolute;left:0;right:0;top:190px;text-align:center;font-size:54px;font-weight:900">앱 설치 → <span class="or">Code 탭</span> → 빈 폴더 선택 → 계산기 만들기</div>
+ <div class="box a" style="animation-delay:1.2s;left:130px;top:330px;width:1000px;height:560px">다음 영상 자리<br><small style="font-size:36px">(스튜디오에서 '동영상' 요소 배치)</small></div>
+ <div class="box a" style="animation-delay:1.6s;left:1250px;top:330px;width:540px;height:260px;border-radius:50%/50%">구독 버튼 자리</div>
+ <div class="box a" style="animation-delay:2s;left:1250px;top:630px;width:540px;height:260px">영상 · 재생목록<br>자리</div>
+ <div class="ft">다음 영상: 스킬 · 커넥터 — 구독하고 알림 설정</div></div><script>
+const q=new URLSearchParams(location.search).get('s')||'title';
+document.getElementById(q).classList.add('on');
+</script></body></html>
