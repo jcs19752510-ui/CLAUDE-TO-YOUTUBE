@@ -74,7 +74,7 @@ def synth(text, model, voice, tries=6):
     raise SystemExit("[오류] 재시도 횟수를 초과했습니다. 잠시 후 다시 실행하세요.")
 
 
-def split_by_silence(src_audio, n, out_paths, speed):
+def split_by_silence(src_audio, n, out_paths, speed, chars=None):
     """챕터 하나의 음성을 '쉬는 구간'을 기준으로 문단 n개로 나눈다.
     가장 긴 무음 n-1개를 문단 경계로 사용. 못 찾으면 None."""
     import re as _re
@@ -94,7 +94,26 @@ def split_by_silence(src_audio, n, out_paths, speed):
     else:
         if len(sil) < n - 1:
             return None
-        cuts = sorted(sorted(sil, reverse=True)[: n - 1], key=lambda x: x[1])
+        # 문단 경계 후보 = 무음 구간의 가운데 지점.
+        # 문단 안의 문장 사이 쉼도 길 수 있어서, '길이'만이 아니라 '글자 수 비율로 예상한 위치'에 가까운 것을 고른다.
+        chars = chars or [1] * n
+        tot_c = float(sum(chars))
+        cuts, prev_m, acc = [], 0.0, 0
+        for k in range(n - 1):
+            acc += chars[k]
+            expected = total * acc / tot_c
+            best = None
+            for d, s, e in sil:
+                m = (s + e) / 2
+                if m <= prev_m + 1.0:
+                    continue
+                score = abs(m - expected) / total * 8.0 - min(d, 1.2)
+                if best is None or score < best[0]:
+                    best = (score, d, s, e, m)
+            if best is None:
+                return None
+            cuts.append((best[1], best[2], best[3]))
+            prev_m = best[4]
     bounds = [0.0] + [(s + e) / 2 for _, s, e in cuts] + [total]
     for i, out in enumerate(out_paths):
         tmp = Path(str(out) + ".tmp.wav")
@@ -184,15 +203,20 @@ def main():
                 time.sleep(a.gap)
             continue
         # 챕터 모드: 문단 사이에 빈 줄을 넣어 한 번에 요청 → 쉬는 구간으로 문단 분리
-        audio, mime = synth("\n\n".join(plist), a.model, a.voice)
-        whole = out / f"_chapter_{ci + 1:02d}.mp3"
-        to_mp3(audio, mime, whole, 1.0)           # 분리 전에는 원래 속도 유지
-        res = split_by_silence(whole, len(plist), files, a.speed)
+        raw_dir = out / "_원본"
+        raw_dir.mkdir(exist_ok=True)
+        whole = raw_dir / f"chapter_{ci + 1:02d}.mp3"
+        if whole.exists() and not a.overwrite:
+            print(f"원본 보관본 사용(재요청 없음): {whole.name}")
+        else:
+            audio, mime = synth("\n\n".join(plist), a.model, a.voice)
+            to_mp3(audio, mime, whole, 1.0)       # 분리 전에는 원래 속도로 보관
+            time.sleep(a.gap)
+        res = split_by_silence(whole, len(plist), files, a.speed, [len(x) for x in plist])
         if res is None:
             warn.append(f"{ch} 문단 분리 실패 → 챕터 전체 파일만 저장: {whole.name}")
             print(f"[경고] {ch} 문단 분리 실패. 챕터 파일 {whole.name} 만 저장했습니다.")
         else:
-            whole.unlink(missing_ok=True)
             for pi, f in enumerate(files):
                 d = duration_of(f)
                 cps = len(plist[pi]) / max(d, 0.1)
@@ -202,7 +226,6 @@ def main():
                     warn.append(f"{f.name}: {len(plist[pi])}자 / {d:.1f}초 = {cps:.1f}자/초")
                 print(f"생성: {f.name}  ({len(plist[pi])}자, {d:.1f}초, {cps:.1f}자/초){flag}")
             made += len(files)
-        time.sleep(a.gap)
     if warn:
         print("\n[확인 필요]")
         for w in warn:
