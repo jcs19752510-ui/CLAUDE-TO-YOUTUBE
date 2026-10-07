@@ -61,6 +61,10 @@ def synth(text, model, voice, tries=6):
             if e.code == 429 and "PerDay" in msg:
                 raise SystemExit("[중단] 이 모델의 하루 무료 한도를 모두 썼습니다. 다른 모델(--model)을 쓰거나, 한도가 풀린 뒤"
                                  " 다시 실행하세요. (이미 만든 파일은 건너뛰고 이어서 만듭니다)")
+            if e.code == 400 and "generate text" in msg and attempt < tries - 1:
+                print(f"   모델이 음성 대신 글을 만들려 함(400) → 5초 후 재시도 ({attempt + 1}/{tries - 1})")
+                time.sleep(5)
+                continue
             if e.code in (500, 502, 503, 504) and attempt < tries - 1:
                 print(f"   서버 일시 오류({e.code}) → 15초 대기 후 재시도 ({attempt + 1}/{tries - 1})")
                 time.sleep(15)
