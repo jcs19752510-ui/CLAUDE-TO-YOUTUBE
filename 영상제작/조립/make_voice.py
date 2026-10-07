@@ -102,15 +102,20 @@ def split_by_silence(src_audio, n, out_paths, speed, chars=None):
     import re as _re
     ffmpeg, _ = tools()
     total = duration_of(src_audio)
-    r = subprocess.run([ffmpeg, "-hide_banner", "-i", str(src_audio), "-af",
-                        "silencedetect=noise=-38dB:d=0.12", "-f", "null", "-"],
-                       capture_output=True, text=True)
-    starts = [float(x) for x in _re.findall(r"silence_start: ([\d.]+)", r.stderr)]
-    ends = [(float(a), float(b)) for a, b in _re.findall(r"silence_end: ([\d.]+) \| silence_duration: ([\d.]+)", r.stderr)]
     sil = []
-    for (e, d), s in zip(ends, starts):
-        if s > 0.4 and e < total - 0.4:           # 맨 앞·맨 뒤 무음은 제외
-            sil.append((d, s, e))
+    # 엄격한 기준(-38dB, 0.12초)과 느슨한 기준(-30dB, 0.06초)의 쉬는 구간을 함께 후보로 쓴다.
+    # 엄격한 기준만 쓰면 문단 안 문장 사이 쉼이 문단 경계로 뽑히고 실제 경계는 놓치는 경우가 있다.
+    for noise, dmin in (("-38dB", "0.12"), ("-30dB", "0.06")):
+        r = subprocess.run([ffmpeg, "-hide_banner", "-i", str(src_audio), "-af",
+                            f"silencedetect=noise={noise}:d={dmin}", "-f", "null", "-"],
+                           capture_output=True, text=True)
+        starts = [float(x) for x in _re.findall(r"silence_start: ([\d.]+)", r.stderr)]
+        ends = [(float(a), float(b)) for a, b in _re.findall(r"silence_end: ([\d.]+) \| silence_duration: ([\d.]+)", r.stderr)]
+        for (e, d), s in zip(ends, starts):
+            if s > 0.4 and e < total - 0.4:           # 맨 앞·맨 뒤 무음은 제외
+                mid = (s + e) / 2
+                if not any(abs(mid - (s2 + e2) / 2) < 0.15 for _, s2, e2 in sil):
+                    sil.append((d, s, e))
     if n == 1:
         cuts = []
     else:
