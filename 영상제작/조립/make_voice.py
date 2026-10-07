@@ -14,7 +14,7 @@
 출력: 영상제작/음성/V{챕터}_p{문단}.mp3   (문단 하나 = 파일 하나)
 
 주의:
-  - 무료 단계는 '분당 호출 수' 한도가 있어 429 오류가 날 수 있습니다. 이 스크립트는 자동으로 기다렸다 재시도합니다.
+  - 무료 단계는 '분당 호출 수'와 '하루 호출 수(모델별·프로젝트별)' 한도가 있습니다. 분당 한도(429)는 자동으로 기다렸다 재시도하지만, 하루 한도는 재시도로 해결되지 않습니다 (다른 모델 사용 / 한도 초기화 대기 / 다른 프로젝트 키 / 유료 전환).
   - 말 속도는 파일 후처리(--speed, 기본 0.92배)로 조절합니다. (프롬프트에 속도 지시를 넣으면 지시문이 음성으로 읽힐 수 있어 쓰지 않습니다.)
   - 목소리 품질·무료 한도·상업 이용 약관은 Google 공식 문서에서 직접 확인하세요.
 """
@@ -71,11 +71,20 @@ def synth(text, model, voice, tries=6):
     raise SystemExit("[오류] 재시도 횟수를 초과했습니다. 잠시 후 다시 실행하세요.")
 
 
-def to_mp3(wav_bytes, out_path, speed):
+def to_mp3(audio, mime, out_path, speed):
+    """WAV 또는 원시 PCM(L16) 음성을 mp3로 변환. 말 속도는 atempo로 조절."""
     ffmpeg, _ = tools()
-    tmp = Path(str(out_path) + ".tmp.wav")
-    tmp.write_bytes(wav_bytes)
-    cmd = [ffmpeg, "-loglevel", "error", "-y", "-i", str(tmp)]
+    import re as _re
+    if audio[:4] == b"RIFF":                      # 이미 WAV
+        tmp = Path(str(out_path) + ".tmp.wav")
+        pre = []
+    else:                                         # 원시 PCM (예: audio/L16;rate=24000)
+        m = _re.search(r"rate=(\d+)", mime or "")
+        rate = m[1] if m else "24000"
+        tmp = Path(str(out_path) + ".tmp.pcm")
+        pre = ["-f", "s16le", "-ar", rate, "-ac", "1"]
+    tmp.write_bytes(audio)
+    cmd = [ffmpeg, "-loglevel", "error", "-y"] + pre + ["-i", str(tmp)]
     if abs(speed - 1.0) > 0.001:
         cmd += ["-af", f"atempo={speed}"]
     cmd += ["-ar", "44100", "-ac", "1", "-c:a", "libmp3lame", "-q:a", "3", str(out_path)]
@@ -109,11 +118,8 @@ def main():
             if f.exists() and not a.overwrite:
                 skipped += 1
                 continue
-            wav, mime = synth(text, a.model, a.voice)
-            if "wav" in mime or wav[:4] == b"RIFF":
-                to_mp3(wav, f, a.speed)
-            else:
-                raise SystemExit(f"[오류] 예상하지 못한 음성 형식: {mime}")
+            audio, mime = synth(text, a.model, a.voice)
+            to_mp3(audio, mime, f, a.speed)
             made += 1
             print(f"생성: {f.name}  ({len(text)}자)")
             time.sleep(a.gap)
