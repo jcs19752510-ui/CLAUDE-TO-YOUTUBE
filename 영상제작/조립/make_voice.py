@@ -81,7 +81,7 @@ def split_by_silence(src_audio, n, out_paths, speed, chars=None):
     ffmpeg, _ = tools()
     total = duration_of(src_audio)
     r = subprocess.run([ffmpeg, "-hide_banner", "-i", str(src_audio), "-af",
-                        "silencedetect=noise=-38dB:d=0.28", "-f", "null", "-"],
+                        "silencedetect=noise=-38dB:d=0.12", "-f", "null", "-"],
                        capture_output=True, text=True)
     starts = [float(x) for x in _re.findall(r"silence_start: ([\d.]+)", r.stderr)]
     ends = [(float(a), float(b)) for a, b in _re.findall(r"silence_end: ([\d.]+) \| silence_duration: ([\d.]+)", r.stderr)]
@@ -93,7 +93,16 @@ def split_by_silence(src_audio, n, out_paths, speed, chars=None):
         cuts = []
     else:
         if len(sil) < n - 1:
-            return None
+            # 쉬는 구간이 부족하면 글자 수 비율로 위치를 추정해서 자른다 (경고 표시용으로 estimated=True)
+            cs = chars or [1] * n
+            tc = float(sum(cs))
+            acc = 0
+            est = []
+            for k in range(n - 1):
+                acc += cs[k]
+                x = total * acc / tc
+                est.append((0.0, x, x))
+            sil = est
         # 문단 경계 후보 = 무음 구간의 가운데 지점.
         # 문단 안의 문장 사이 쉼도 길 수 있어서, '길이'만이 아니라 '글자 수 비율로 예상한 위치'에 가까운 것을 고른다.
         chars = chars or [1] * n
@@ -172,7 +181,8 @@ def main():
                     help="chapter: 챕터마다 1회 요청(하루 한도 절약, 기본) / paragraph: 문단마다 요청")
     ap.add_argument("--only", type=int, help="이 챕터 번호(1~10)만 생성")
     ap.add_argument("--gap", type=float, default=12.0, help="요청 사이 대기(초). 무료 한도 보호용")
-    ap.add_argument("--overwrite", action="store_true")
+    ap.add_argument("--overwrite", action="store_true", help="API를 다시 호출해 음성을 새로 만든다")
+    ap.add_argument("--resplit", action="store_true", help="보관된 원본 챕터 음성으로 문단만 다시 분리한다 (API 호출 없음)")
     ap.add_argument("--script", default=str(ROOT / "10_AI음성_입력용_대본.md"))
     ap.add_argument("--out", default=str(ROOT / "음성"))
     a = ap.parse_args()
@@ -187,7 +197,7 @@ def main():
             continue
         plist = paras.get(ch, [])
         files = [out / voice_name(ci, pi) for pi in range(len(plist))]
-        if not a.overwrite and all(f.exists() for f in files):
+        if not a.overwrite and not a.resplit and all(f.exists() for f in files):
             skipped += len(files)
             continue
         if a.mode == "paragraph":
