@@ -3,7 +3,9 @@
 
 사용법:
     python 조립/make_voice.py --voice Kore              # 전체 문단 음성 생성 → 음성/V01_p00.mp3 ...
-    python 조립/make_voice.py --only 6                  # ⑥ 챕터만 생성
+    python 조립/make_voice.py --only 6                  # ⑥ 챕터만 생성 (챕터 번호 1~20, 여러 개 가능: --only 11 12 13)
+    python 조립/make_voice.py --mode paragraph --only 1 --para 1 --overwrite   # V01_p01 한 문단만 새로 생성
+    python 조립/make_voice.py --only 11 12 --dry-run    # API 호출 없이 '무엇을 몇 회 요청할지'만 출력
     python 조립/make_voice.py --voice Charon --overwrite
 
 키 전달 방식 (둘 중 하나):
@@ -15,13 +17,17 @@
 
 주의:
   - 무료 단계는 '분당 호출 수'와 '하루 호출 수(모델별·프로젝트별)' 한도가 있습니다. 분당 한도(429)는 자동으로 기다렸다 재시도하지만, 하루 한도는 재시도로 해결되지 않습니다 (다른 모델 사용 / 한도 초기화 대기 / 다른 프로젝트 키 / 유료 전환).
+  - 하루 한도(오류 본문에 PerDay/per day/daily)는 재시도 없이 즉시 중단하고 retryDelay를 출력합니다.
+  - 챕터 모드는 보관된 옛 원본(음성/_원본/chapter_NN.mp3)을 다시 분리할 수 있습니다. 글이 바뀐 챕터(①②⑩)는 _STALE_RAW 로 막아 둡니다 (--mode paragraph 사용).
   - 말 속도는 파일 후처리(--speed, 기본 0.92배)로 조절합니다. (프롬프트에 속도 지시를 넣으면 지시문이 음성으로 읽힐 수 있어 쓰지 않습니다.)
   - 목소리 품질·무료 한도·상업 이용 약관은 Google 공식 문서에서 직접 확인하세요.
 """
 import argparse
 import base64
+import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -31,6 +37,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import CHAPTERS, ROOT, parse_paragraphs, tools, voice_name  # noqa: E402
+
+# 15분본 글로 만든 옛 원본이라 다시 분리하면 수정 전 문장이 되살아나는 챕터 (음성_재생성_목록.md 5장)
+_STALE_RAW = {1, 2, 10}
 
 BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
@@ -57,10 +66,15 @@ def synth(text, model, voice, tries=6):
             part = d["candidates"][0]["content"]["parts"][0]["inlineData"]
             return base64.b64decode(part["data"]), part.get("mimeType", "")
         except urllib.error.HTTPError as e:
-            msg = e.read().decode("utf8", "ignore")[:300]
-            if e.code == 429 and "PerDay" in msg:
-                raise SystemExit("[중단] 이 모델의 하루 무료 한도를 모두 썼습니다. 다른 모델(--model)을 쓰거나, 한도가 풀린 뒤"
-                                 " 다시 실행하세요. (이미 만든 파일은 건너뛰고 이어서 만듭니다)")
+            full = e.read().decode("utf8", "ignore")
+            msg = full[:300]
+            low = full.lower()
+            if e.code == 429 and ("perday" in low or "per day" in low or "daily" in low):
+                m = re.search(r'"retryDelay":\s*"([^"]+)"', full)
+                delay = m[1] if m else "(응답에 retryDelay 없음)"
+                raise SystemExit(f"[중단] 하루 한도 초과(429). 재시도하지 않습니다. retryDelay: {delay}\n"
+                                 "  다른 모델(--model) / 한도 초기화 대기 / 다른 프로젝트 키 / 유료 전환 중에서 고르세요."
+                                 " 이미 만든 파일은 건너뛰고 이어서 만듭니다.")
             if e.code == 400 and "generate text" in msg and attempt < tries - 1:
                 print(f"   모델이 음성 대신 글을 만들려 함(400) → 5초 후 재시도 ({attempt + 1}/{tries - 1})")
                 time.sleep(5)
@@ -180,6 +194,10 @@ def to_mp3(audio, mime, out_path, speed):
         raise SystemExit("[ffmpeg 오류] " + r.stderr[-400:])
 
 
+def _ch_hash(plist):
+    return hashlib.sha1("\n\n".join(plist).encode("utf8")).hexdigest()
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="gemini-3.8-flash-lite-tts")
@@ -187,32 +205,62 @@ def main():
     ap.add_argument("--speed", type=float, default=0.92, help="말 속도 배율 (1.0=원래, 0.92=조금 느리게)")
     ap.add_argument("--mode", choices=["chapter", "paragraph"], default="chapter",
                     help="chapter: 챕터마다 1회 요청(하루 한도 절약, 기본) / paragraph: 문단마다 요청")
-    ap.add_argument("--only", type=int, help="이 챕터 번호(1~10)만 생성")
+    ap.add_argument("--only", type=int, nargs="+", help="이 챕터 번호(1~20)만 생성. 여러 개 가능")
+    ap.add_argument("--para", type=int, nargs="+", help="--only 챕터 안에서 이 문단 번호(0부터)만 처리 (--mode paragraph 전용)")
     ap.add_argument("--gap", type=float, default=12.0, help="요청 사이 대기(초). 무료 한도 보호용")
     ap.add_argument("--overwrite", action="store_true", help="API를 다시 호출해 음성을 새로 만든다")
     ap.add_argument("--resplit", action="store_true", help="보관된 원본 챕터 음성으로 문단만 다시 분리한다 (API 호출 없음)")
+    ap.add_argument("--dry-run", action="store_true", help="API·파일 쓰기 없이 계획(방식·요청 수)만 출력")
     ap.add_argument("--script", default=str(ROOT / "10_AI음성_입력용_대본.md"))
     ap.add_argument("--out", default=str(ROOT / "음성"))
     a = ap.parse_args()
 
+    n_ch = len(CHAPTERS)
+    for n in a.only or []:
+        if not 1 <= n <= n_ch:
+            ap.error(f"--only 는 1~{n_ch} 입니다: {n}")
+    if a.para:
+        if not a.only or len(a.only) != 1:
+            ap.error("--para 는 --only 에 챕터 하나를 함께 지정해야 합니다")
+        if a.mode != "paragraph":
+            ap.error("--para 는 --mode paragraph 에서만 쓸 수 있습니다 (챕터 모드는 챕터 전체를 한 번에 만듭니다)")
+
     paras = parse_paragraphs(a.script)
     out = Path(a.out)
-    out.mkdir(parents=True, exist_ok=True)
-    made = skipped = 0
+    dry = a.dry_run
+    if not dry:
+        out.mkdir(parents=True, exist_ok=True)
+    made = skipped = requests = 0
     warn = []
+    tag = "[dry-run] " if dry else ""
     for ci, ch in enumerate(CHAPTERS):
-        if a.only and a.only != ci + 1:
+        if a.only and (ci + 1) not in a.only:
             continue
         plist = paras.get(ch, [])
+        if not plist:
+            warn.append(f"{ch}: 대본에서 문단을 찾지 못함")
+            continue
         files = [out / voice_name(ci, pi) for pi in range(len(plist))]
+        if a.para:
+            bad = [x for x in a.para if not 0 <= x < len(plist)]
+            if bad:
+                raise SystemExit(f"[오류] {ch} 문단 번호 범위는 0~{len(plist) - 1} 입니다: {bad}")
         if not a.overwrite and not a.resplit and all(f.exists() for f in files):
             skipped += len(files)
+            print(f"{tag}{ch} 건너뜀: 음성 {len(files)}개 이미 있음")
             continue
         if a.mode == "paragraph":
             for pi, text in enumerate(plist):
                 f = files[pi]
+                if a.para and pi not in a.para:
+                    continue
                 if f.exists() and not a.overwrite:
                     skipped += 1
+                    continue
+                if dry:
+                    print(f"{tag}{ch} {f.name} 문단 모드 요청 1회 ({len(text)}자)" + (" [덮어쓰기]" if f.exists() else " [신규]"))
+                    made += 1
+                    requests += 1
                     continue
                 audio, mime = synth(text, a.model, a.voice)
                 to_mp3(audio, mime, f, a.speed)
@@ -222,13 +270,34 @@ def main():
             continue
         # 챕터 모드: 문단 사이에 빈 줄을 넣어 한 번에 요청 → 쉬는 구간으로 문단 분리
         raw_dir = out / "_원본"
-        raw_dir.mkdir(exist_ok=True)
         whole = raw_dir / f"chapter_{ci + 1:02d}.mp3"
-        if whole.exists() and not a.overwrite:
+        stamp = raw_dir / f"chapter_{ci + 1:02d}.sha1"
+        reuse = whole.exists() and not a.overwrite
+        if reuse:
+            # 옛 원본이 지금 대본과 다른 글일 수 있으면 재사용하지 않는다 (수정 전 문장이 되살아남)
+            if stamp.exists() and stamp.read_text().strip() != _ch_hash(plist):
+                warn.append(f"{ch}: 보관 원본이 현재 대본과 다른 글로 만들어짐 → 건너뜀 (--mode paragraph 또는 --overwrite)")
+                print(f"[경고] {ch} {whole.name} 은 현재 대본과 글이 달라 쓰지 않습니다. --mode paragraph 로 문단만 다시 만드세요.")
+                continue
+            if not stamp.exists() and (ci + 1) in _STALE_RAW:
+                warn.append(f"{ch}: 보관 원본이 수정 전(15분본) 글 → 건너뜀 (--mode paragraph --only {ci + 1} --para N --overwrite)")
+                print(f"[경고] {ch} {whole.name} 은 수정 전 글이라 다시 분리하지 않습니다. --mode paragraph 를 쓰세요.")
+                continue
+        if dry:
+            if reuse:
+                print(f"{tag}{ch} 챕터 모드: 보관 원본 재분리, 요청 0회 → 문단 {len(files)}개 파일 덮어씀")
+            else:
+                print(f"{tag}{ch} 챕터 모드: 요청 1회 → 문단 {len(files)}개 ({sum(len(x) for x in plist)}자)")
+                requests += 1
+            made += len(files)
+            continue
+        raw_dir.mkdir(exist_ok=True)
+        if reuse:
             print(f"원본 보관본 사용(재요청 없음): {whole.name}")
         else:
             audio, mime = synth("\n\n".join(plist), a.model, a.voice)
             to_mp3(audio, mime, whole, 1.0)       # 분리 전에는 원래 속도로 보관
+            stamp.write_text(_ch_hash(plist))
             time.sleep(a.gap)
         res = split_by_silence(whole, len(plist), files, a.speed, [len(x) for x in plist])
         if res is None:
@@ -248,7 +317,10 @@ def main():
         print("\n[확인 필요]")
         for w in warn:
             print(" -", w)
-    print(f"완료: 새로 {made}개, 건너뜀 {skipped}개 → {out}")
+    if dry:
+        print(f"[dry-run] 새로 만들 문단 {made}개, 건너뜀 {skipped}개, API 요청 {requests}회 (실제 호출 없음)")
+    else:
+        print(f"완료: 새로 {made}개, 건너뜀 {skipped}개 → {out}")
 
 
 if __name__ == "__main__":

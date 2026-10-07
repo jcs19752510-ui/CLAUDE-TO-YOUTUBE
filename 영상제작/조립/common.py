@@ -5,8 +5,16 @@ import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent          # 영상제작/
-CHAPTERS = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
-CHAPTER_TITLES = {
+CHAPTERS = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩",
+            "⑪", "⑫", "⑬", "⑭", "⑮", "⑯", "⑰", "⑱", "⑲", "⑳"]     # 챕터 번호 = 음성 파일 번호 (재생 순서와 다름)
+# 30분본 영상 재생 순서. ⑦은 p00~p08 / p09 로 갈라지고 사이에 ⑪이 들어간다. ⑩은 맨 끝.
+# 항목 = (챕터, 시작 문단 번호, 끝 문단 번호(포함); None=끝까지)
+PLAY_ORDER = [("①", 0, None), ("②", 0, None), ("③", 0, None), ("④", 0, None), ("⑤", 0, None),
+              ("⑥", 0, None), ("⑦", 0, 8), ("⑪", 0, None), ("⑦", 9, None), ("⑧", 0, None),
+              ("⑨", 0, None), ("⑫", 0, None), ("⑬", 0, None), ("⑭", 0, None), ("⑮", 0, None),
+              ("⑯", 0, None), ("⑰", 0, None), ("⑱", 0, None), ("⑲", 0, None), ("⑳", 0, None),
+              ("⑩", 0, None)]
+CHAPTER_TITLES = {   # 구형 assemble.py 가 쓰는 값(15분본 이전 구성, 그대로 둠). 30분본 제목은 parse_titles() 사용
     "①": "하이라이트", "②": "통증 + 약속", "③": "챗·코워크·코드 선택표", "④": "설치와 로그인",
     "⑤": "첫 프로젝트", "⑥": "CLAUDE.md (업무 지침서)", "⑦": "플랜 모드",
     "⑧": "안전장치 + 초보 실수 3가지", "⑨": "비용·기억 관리", "⑩": "요약 + 오늘 할 일",
@@ -68,25 +76,34 @@ def duration(path):
 
 
 def parse_paragraphs(path):
-    """대본(.md)에서 챕터(①~⑩)별 문단 목록을 읽는다."""
+    """대본(.md)에서 챕터(①~⑳)별 문단 목록을 읽는다. 첫 `---`(머리말)와 챕터 사이 `---`는 문단을 끊는다."""
     out, cur = {}, None
     for line in Path(path).read_text(encoding="utf8").split("\n"):
-        m = re.match(r"## ([①-⑩])", line)
+        m = re.match(r"## ([①-⑳])", line)
         if m:
             cur = m[1]
             out[cur] = []
             continue
         if line.startswith("---") or line.startswith("총 약"):
-            if cur == "⑩":
-                cur = None
+            cur = None
             continue
         if cur and line.strip() and not line.startswith(("#", ">")):
             out[cur].append(line.strip())
     return out
 
 
+def parse_titles(path):
+    """대본 `## ⑪ 제목  →  파일 이름: ...` 줄에서 챕터 제목을 읽는다."""
+    out = {}
+    for line in Path(path).read_text(encoding="utf8").split("\n"):
+        m = re.match(r"## ([①-⑳])\s+(.*?)\s*(?:→.*)?$", line)
+        if m:
+            out[m[1]] = m[2].strip()
+    return out
+
+
 def voice_name(ch_index, p_index):
-    """음성 파일 이름 규칙: V01_p00.mp3 (챕터 1~10, 문단 0부터)."""
+    """음성 파일 이름 규칙: V01_p00.mp3 (챕터 1~20, 문단 0부터)."""
     return f"V{ch_index + 1:02d}_p{p_index:02d}.mp3"
 
 

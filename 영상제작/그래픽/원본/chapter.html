@@ -15,11 +15,12 @@ html,body{width:1920px;height:1080px;background:#0b1020;overflow:hidden;font-fam
 .box{position:absolute;left:260px;right:260px;top:250px;bottom:250px;border-radius:50px;border:6px solid #ffffff44;background:#ffffff10;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px;opacity:0;animation:in .7s ease .3s forwards}
 .box .h{font-family:BH;font-size:110px;color:#ffd23f;margin-bottom:40px}
 .box .p{font-size:62px;font-weight:900;line-height:1.5}
+.t.long{font-size:96px;line-height:1.18;text-wrap:balance;word-break:keep-all;top:520px}
 </style></head><body><div class="bg"></div>
 <div id="ch"><div class="num" id="n"></div><div class="line"></div><div class="t" id="t"></div><div class="s" id="s"></div></div>
 <div class="box" id="box"><div class="h" id="bh"></div><div class="p" id="bp"></div></div>
 <script>
 const q=new URLSearchParams(location.search);
 if(q.get('k')==='box'){document.getElementById('ch').style.display='none';const b=document.getElementById('box');b.style.display='flex';document.getElementById('bh').textContent=q.get('h');document.getElementById('bp').innerHTML=q.get('p').replace(/\|/g,'<br>')}
-else{document.getElementById('n').textContent=q.get('n');document.getElementById('t').textContent=q.get('t');document.getElementById('s').textContent=q.get('s')||''}
+else{document.getElementById('n').textContent=q.get('n');const tt=q.get('t');const te=document.getElementById('t');te.textContent=tt;if(tt.length>13)te.classList.add('long');document.getElementById('s').textContent=q.get('s')||''}
 </script></body></html>
