@@ -1,0 +1,141 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(fonts/black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(fonts/noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(fonts/noto-sans-kr-korean-700-normal.woff2)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;background:#0b1020;overflow:hidden;font-family:NK,sans-serif;color:#fff}
+.s{position:absolute;inset:0;display:none;background:radial-gradient(1200px 800px at 85% 15%,#3a2012 0%,#0b1020 60%),#0b1020}
+.s.on{display:block}
+.bh{font-family:BH,NK,sans-serif;font-weight:400}
+.or{color:#ff7a3d}.yl{color:#ffd23f}.gr{color:#22c55e}.rd{color:#ff5a5a}
+@keyframes in{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes inl{from{opacity:0;transform:translateX(-80px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}70%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+.a{opacity:0;animation:in .7s ease forwards}
+.al{opacity:0;animation:inl .7s ease forwards}
+.ap{opacity:0;animation:pop .6s ease forwards}
+.hd{position:absolute;left:0;right:0;top:70px;text-align:center;font-size:92px;text-shadow:0 6px 0 #000a}
+.ft{position:absolute;left:0;right:0;bottom:50px;text-align:center;font-size:36px;color:#9aa6c2;font-weight:700}
+/* title */
+#title .l1{position:absolute;left:0;right:0;top:230px;text-align:center;font-size:190px;line-height:1.05;text-shadow:0 8px 0 #000a}
+#title .l2{position:absolute;left:0;right:0;top:520px;text-align:center;font-size:150px;line-height:1.05}
+#title .l3{position:absolute;left:50%;top:790px;transform:translateX(-50%);background:#ffd23f;color:#111;font-size:84px;padding:6px 60px;border-radius:70px}
+/* map */
+.map{position:absolute;left:110px;right:110px;top:300px;display:flex;gap:70px;align-items:stretch}
+.card{flex:1;background:#ffffff12;border:5px solid #ffffff33;border-radius:36px;padding:56px 44px;text-align:center;position:relative}
+.card .n{width:120px;height:120px;border-radius:50%;background:#ff7a3d;color:#fff;font-size:76px;display:flex;align-items:center;justify-content:center;margin:0 auto 32px}
+.card .t{font-size:62px;line-height:1.25;font-weight:900}
+.arrow{position:absolute;top:50%;font-size:90px;color:#ff7a3d}
+/* choose */
+.row{position:absolute;left:150px;right:150px;height:200px;display:flex;align-items:center;border-radius:36px;background:#ffffff12;border:5px solid #ffffff33;padding:0 60px;font-weight:900}
+.row .k{width:900px;font-size:58px;white-space:nowrap}
+.row .ar{font-size:80px;color:#ff7a3d;width:140px;text-align:center}
+.row .v{font-size:84px;white-space:nowrap}
+/* mistakes */
+.m{position:absolute;left:130px;right:130px;height:230px;display:flex;align-items:center;gap:36px;border-radius:36px;background:#ffffff12;border:5px solid #ff5a5a66;padding:0 50px}
+.m .n{flex:none;width:130px;height:130px;border-radius:50%;background:#ff5a5a;font-size:84px;display:flex;align-items:center;justify-content:center}
+.m .x{font-size:60px;font-weight:900;width:760px}
+.m .ar{font-size:70px;color:#ffd23f}
+.m .y{font-size:56px;font-weight:900;color:#22c55e;flex:1;line-height:1.25}
+/* steps */
+.st{position:absolute;left:150px;right:150px;height:230px;display:flex;align-items:center;gap:50px;border-radius:36px;background:#ffffff12;border:5px solid #ffffff33;padding:0 60px}
+.st .n{flex:none;width:130px;height:130px;border-radius:50%;background:#ff7a3d;font-size:84px;display:flex;align-items:center;justify-content:center}
+.st .t{font-size:84px;font-weight:900}
+/* keys */
+.kc{position:absolute;top:300px;width:540px;text-align:center}
+.key{display:inline-block;min-width:200px;background:#f4f6fb;color:#111;border-radius:28px;font-size:78px;padding:30px 44px;box-shadow:0 14px 0 #8a93a8,0 22px 40px #000a;font-weight:900;margin:0 10px}
+.kc .d{margin-top:70px;font-size:64px;font-weight:900}
+.kc .d small{display:block;font-size:40px;color:#9aa6c2;margin-top:12px;font-weight:700}
+/* cost */
+.cc{position:absolute;top:290px;width:540px;height:560px;border-radius:40px;background:#ffffff12;border:5px solid #ffffff33;padding:50px 36px;text-align:center}
+.cc .c{font-size:70px;font-weight:900;color:#ff7a3d;line-height:1.2}
+.cc .d{margin-top:34px;font-size:50px;font-weight:700;line-height:1.35}
+/* summary */
+.sm{position:absolute;left:170px;right:170px;height:150px;display:flex;align-items:center;gap:36px;border-radius:30px;background:#ffffff12;border:4px solid #ffffff33;padding:0 44px;font-size:56px;font-weight:900}
+.sm .n{flex:none;width:86px;height:86px;border-radius:50%;background:#22c55e;font-size:56px;display:flex;align-items:center;justify-content:center}
+/* end */
+.box{position:absolute;border:6px dashed #ffffff66;border-radius:30px;display:flex;align-items:center;justify-content:center;color:#ffffffaa;font-size:48px;font-weight:700;text-align:center}
+</style></head><body>
+
+<div class="s" id="title">
+ <div class="l1 bh a" style="animation-delay:.2s">2026 <span class="or">클로드 코드</span> 사용법</div>
+ <div class="l2 bh a" style="animation-delay:.9s">챗·COWORK <span class="yl">15분 총정리</span></div>
+ <div class="l3 bh ap" style="animation-delay:1.6s">왕초보 · 무료 치트시트</div>
+</div>
+
+<div class="s" id="map">
+ <div class="hd bh a" style="animation-delay:.1s">오늘 배울 <span class="or">3가지</span></div>
+ <div class="map">
+  <div class="card a" style="animation-delay:.6s"><div class="n bh">1</div><div class="t">어떤 도구를<br>쓸까?</div></div>
+  <div class="card a" style="animation-delay:1.6s"><div class="n bh">2</div><div class="t">클로드 코드<br>기본</div></div>
+  <div class="card a" style="animation-delay:2.6s"><div class="n bh">3</div><div class="t">실수<br>줄이기</div></div>
+ </div>
+ <div class="ft">챗 · 코워크 · 클로드 코드</div>
+</div>
+
+<div class="s" id="choose">
+ <div class="hd bh a" style="animation-delay:.1s">결과물이 <span class="yl">뭐냐?</span></div>
+ <div class="row al" style="top:260px;animation-delay:.8s"><div class="k">답변 · 생각 정리</div><div class="ar">→</div><div class="v bh or">챗</div></div>
+ <div class="row al" style="top:500px;animation-delay:2.4s"><div class="k">정리된 파일 · 보고서</div><div class="ar">→</div><div class="v bh or">코워크</div></div>
+ <div class="row al" style="top:740px;animation-delay:4s"><div class="k">웹사이트 · 앱 · 계속 쓸 도구</div><div class="ar">→</div><div class="v bh or">클로드 코드</div></div>
+</div>
+
+<div class="s" id="mistakes">
+ <div class="hd bh a" style="animation-delay:.1s">초보 실수 <span class="rd">3가지</span></div>
+ <div class="m al" style="top:250px;animation-delay:.8s"><div class="n bh">1</div><div class="x">한 번에 너무 큰 요청</div><div class="ar">→</div><div class="y">작게 쪼개기<br>큰 건 플랜 모드부터</div></div>
+ <div class="m al" style="top:510px;animation-delay:2.4s"><div class="n bh">2</div><div class="x">처음부터 모두 허용</div><div class="ar">→</div><div class="y">처음엔<br>한 번씩 승인</div></div>
+ <div class="m al" style="top:770px;animation-delay:4s"><div class="n bh">3</div><div class="x">꼬이면 바로 /clear</div><div class="ar">→</div><div class="y">먼저 /compact<br>(clear는 기억 삭제)</div></div>
+</div>
+
+<div class="s" id="install">
+ <div class="hd bh a" style="animation-delay:.1s">설치는 <span class="or">3단계</span></div>
+ <div class="st al" style="top:260px;animation-delay:.7s"><div class="n bh">1</div><div class="t">Node.js 설치</div></div>
+ <div class="st al" style="top:540px;animation-delay:1.9s"><div class="n bh">2</div><div class="t">터미널 열기</div></div>
+ <div class="st al" style="top:820px;animation-delay:3.1s"><div class="n bh">3</div><div class="t">설치 명령 붙여넣기</div></div>
+</div>
+
+<div class="s" id="login">
+ <div class="hd bh a" style="animation-delay:.1s">처음 실행하면</div>
+ <div class="st al" style="top:260px;animation-delay:.7s"><div class="n bh">1</div><div class="t">로그인</div></div>
+ <div class="st al" style="top:540px;animation-delay:1.9s"><div class="n bh">2</div><div class="t">폴더 신뢰</div></div>
+ <div class="st al" style="top:820px;animation-delay:3.1s"><div class="n" style="background:#22c55e"><svg width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg></div><div class="t gr">완료!</div></div>
+</div>
+
+<div class="s" id="keys">
+ <div class="hd bh a" style="animation-delay:.1s">실수해도 <span class="yl">괜찮은</span> 키 3개</div>
+ <div class="kc ap" style="left:110px;animation-delay:.8s"><span class="key">Esc</span><div class="d">멈춤<small>엉뚱한 방향일 때</small></div></div>
+ <div class="kc ap" style="left:690px;animation-delay:2.4s"><span class="key">Esc</span><span class="key">Esc</span><div class="d">되돌리기<small>이전 시점으로</small></div></div>
+ <div class="kc ap" style="left:1270px;animation-delay:4s"><span class="key" style="font-size:66px">Shift + Tab</span><div class="d">모드 전환<small>플랜 모드 켜기</small></div></div>
+</div>
+
+<div class="s" id="cost">
+ <div class="hd bh a" style="animation-delay:.1s">돈 · 기억 · 클릭 <span class="or">관리</span></div>
+ <div class="cc ap" style="left:110px;animation-delay:.8s"><div class="c bh">/model</div><div class="d">일 크기에 맞게<br>모델 바꾸기</div></div>
+ <div class="cc ap" style="left:690px;animation-delay:2.2s"><div class="c bh">/compact<br>/context</div><div class="d">대화 요약 압축<br>기억 사용량 확인</div></div>
+ <div class="cc ap" style="left:1270px;animation-delay:3.6s"><div class="c bh">@파일<br>!명령</div><div class="d">파일만 지정<br>바로 실행</div></div>
+ <div class="ft">clear 전에 compact</div>
+</div>
+
+<div class="s" id="summary">
+ <div class="hd bh a" style="animation-delay:.1s">오늘 <span class="yl">5줄 요약</span></div>
+ <div class="sm al" style="top:230px;animation-delay:.6s"><div class="n bh">1</div>결과물이 뭐냐 → 챗 · 코워크 · 코드</div>
+ <div class="sm al" style="top:410px;animation-delay:1.6s"><div class="n bh">2</div>설치 → claude → 로그인 → 폴더 신뢰</div>
+ <div class="sm al" style="top:590px;animation-delay:2.6s"><div class="n bh">3</div>CLAUDE.md로 업무 지침서 한 번만</div>
+ <div class="sm al" style="top:770px;animation-delay:3.6s"><div class="n bh">4</div>복잡하면 플랜 모드(Shift+Tab)부터</div>
+ <div class="sm al" style="top:950px;animation-delay:4.6s;height:110px;font-size:50px"><div class="n bh" style="width:70px;height:70px;font-size:44px">5</div>Esc 멈춤 · clear 전에 compact</div>
+</div>
+
+<div class="s" id="end">
+ <div class="hd bh a" style="animation-delay:.1s;top:50px;font-size:84px">오늘 할 일 <span class="yl">딱 1개</span></div>
+ <div class="a" style="animation-delay:.7s;position:absolute;left:0;right:0;top:190px;text-align:center;font-size:56px;font-weight:900">빈 폴더에서 <span class="or">claude</span> 실행하고 계산기 하나 만들기</div>
+ <div class="box a" style="animation-delay:1.2s;left:130px;top:330px;width:1000px;height:560px">다음 영상 자리<br><small style="font-size:36px">(스튜디오에서 '동영상' 요소 배치)</small></div>
+ <div class="box a" style="animation-delay:1.6s;left:1250px;top:330px;width:540px;height:260px;border-radius:50%/50%">구독 버튼 자리</div>
+ <div class="box a" style="animation-delay:2s;left:1250px;top:630px;width:540px;height:260px">영상 · 재생목록<br>자리</div>
+ <div class="ft">다음 영상: 스킬 · MCP — 구독하고 알림 설정</div>
+</div>
+
+<script>
+const q=new URLSearchParams(location.search).get('s')||'title';
+document.getElementById(q).classList.add('on');
+</script>
+</body></html>
