@@ -126,25 +126,42 @@ def split_by_silence(src_audio, n, out_paths, speed, chars=None):
                 est.append((0.0, x, x))
             sil = est
         # 문단 경계 후보 = 무음 구간의 가운데 지점.
-        # 문단 안의 문장 사이 쉼도 길 수 있어서, '길이'만이 아니라 '글자 수 비율로 예상한 위치'에 가까운 것을 고른다.
+        # 한 군데씩 욕심내서 고르면 앞의 실수가 뒤로 번지므로, 전체를 한 번에 최적화(동적 계획법)한다:
+        # 각 문단 길이가 '글자 수 비율로 예상한 길이'에 가깝고, 경계가 긴 무음일수록 좋은 조합을 고른다.
         chars = chars or [1] * n
         tot_c = float(sum(chars))
-        cuts, prev_m, acc = [], 0.0, 0
-        for k in range(n - 1):
-            acc += chars[k]
-            expected = total * acc / tot_c
-            best = None
-            for d, s, e in sil:
-                m = (s + e) / 2
-                if m <= prev_m + 1.0:
-                    continue
-                score = abs(m - expected) / total * 8.0 - min(d, 1.2)
-                if best is None or score < best[0]:
-                    best = (score, d, s, e, m)
-            if best is None:
-                return None
-            cuts.append((best[1], best[2], best[3]))
-            prev_m = best[4]
+        exp_len = [total * c / tot_c for c in chars]
+        cand = sorted(((s + e) / 2, d, s, e) for d, s, e in sil)
+        m = len(cand)
+        INF = float("inf")
+        # dp[k][j] = 경계 k개를 쓰고 마지막 경계가 cand[j]일 때 최소 비용
+        dp = [[INF] * m for _ in range(n)]
+        back = [[-1] * m for _ in range(n)]
+        for j in range(m):
+            dp[1][j] = ((cand[j][0] - 0.0 - exp_len[0]) / total) ** 2 * 100 - min(cand[j][1], 1.2) * 0.3
+        for k in range(2, n):
+            for j in range(m):
+                for i in range(j):
+                    if dp[k - 1][i] == INF or cand[j][0] <= cand[i][0] + 1.0:
+                        continue
+                    c = dp[k - 1][i] + ((cand[j][0] - cand[i][0] - exp_len[k - 1]) / total) ** 2 * 100 - min(cand[j][1], 1.2) * 0.3
+                    if c < dp[k][j]:
+                        dp[k][j], back[k][j] = c, i
+        best_j, best_c = -1, INF
+        for j in range(m):
+            if dp[n - 1][j] == INF:
+                continue
+            c = dp[n - 1][j] + ((total - cand[j][0] - exp_len[n - 1]) / total) ** 2 * 100
+            if c < best_c:
+                best_c, best_j = c, j
+        if best_j < 0:
+            return None
+        idx, j = [], best_j
+        for k in range(n - 1, 0, -1):
+            idx.append(j)
+            j = back[k][j]
+        idx.reverse()
+        cuts = [(cand[j][1], cand[j][2], cand[j][3]) for j in idx]
     bounds = [0.0] + [(s + e) / 2 for _, s, e in cuts] + [total]
     for i, out in enumerate(out_paths):
         tmp = Path(str(out) + ".tmp.wav")
