@@ -58,6 +58,9 @@ def synth(text, model, voice, tries=6):
             return base64.b64decode(part["data"]), part.get("mimeType", "")
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf8", "ignore")[:300]
+            if e.code == 429 and "PerDay" in msg:
+                raise SystemExit("[중단] 이 모델의 하루 무료 한도를 모두 썼습니다. 다른 모델(--model)을 쓰거나, 한도가 풀린 뒤"
+                                 " 다시 실행하세요. (이미 만든 파일은 건너뛰고 이어서 만듭니다)")
             if e.code == 429 and attempt < tries - 1:
                 wait = 20 * (attempt + 1)
                 print(f"   한도 도달 → {wait}초 대기 후 재시도 ({attempt + 1}/{tries - 1})")
@@ -69,6 +72,53 @@ def synth(text, model, voice, tries=6):
         except urllib.error.URLError as e:
             raise SystemExit(f"[오류] 접속 실패: {e.reason}")
     raise SystemExit("[오류] 재시도 횟수를 초과했습니다. 잠시 후 다시 실행하세요.")
+
+
+def split_by_silence(src_audio, n, out_paths, speed):
+    """챕터 하나의 음성을 '쉬는 구간'을 기준으로 문단 n개로 나눈다.
+    가장 긴 무음 n-1개를 문단 경계로 사용. 못 찾으면 None."""
+    import re as _re
+    ffmpeg, _ = tools()
+    total = duration_of(src_audio)
+    r = subprocess.run([ffmpeg, "-hide_banner", "-i", str(src_audio), "-af",
+                        "silencedetect=noise=-38dB:d=0.28", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    starts = [float(x) for x in _re.findall(r"silence_start: ([\d.]+)", r.stderr)]
+    ends = [(float(a), float(b)) for a, b in _re.findall(r"silence_end: ([\d.]+) \| silence_duration: ([\d.]+)", r.stderr)]
+    sil = []
+    for (e, d), s in zip(ends, starts):
+        if s > 0.4 and e < total - 0.4:           # 맨 앞·맨 뒤 무음은 제외
+            sil.append((d, s, e))
+    if n == 1:
+        cuts = []
+    else:
+        if len(sil) < n - 1:
+            return None
+        cuts = sorted(sorted(sil, reverse=True)[: n - 1], key=lambda x: x[1])
+    bounds = [0.0] + [(s + e) / 2 for _, s, e in cuts] + [total]
+    for i, out in enumerate(out_paths):
+        tmp = Path(str(out) + ".tmp.wav")
+        # 1) 구간을 WAV로 먼저 자른다 (mp3에서 바로 다듬으면 무음 제거가 적용되지 않는 경우가 있음)
+        rr = subprocess.run([ffmpeg, "-loglevel", "error", "-y", "-i", str(src_audio),
+                             "-ss", f"{bounds[i]:.3f}", "-to", f"{bounds[i + 1]:.3f}",
+                             "-ar", "44100", "-ac", "1", str(tmp)], capture_output=True, text=True)
+        # 2) 앞뒤 무음만 다듬고(문단 안의 쉼은 그대로), 속도 조절 후 mp3로 저장
+        flt = ("silenceremove=start_periods=1:start_threshold=-45dB,areverse,"
+               "silenceremove=start_periods=1:start_threshold=-45dB,areverse")
+        if abs(speed - 1.0) > 0.001:
+            flt += f",atempo={speed}"
+        if rr.returncode == 0:
+            rr = subprocess.run([ffmpeg, "-loglevel", "error", "-y", "-i", str(tmp), "-af", flt,
+                                 "-c:a", "libmp3lame", "-q:a", "3", str(out)], capture_output=True, text=True)
+        tmp.unlink(missing_ok=True)
+        if rr.returncode != 0:
+            raise SystemExit("[ffmpeg 오류] " + rr.stderr[-400:])
+    return bounds
+
+
+def duration_of(path):
+    from common import duration
+    return duration(path)
 
 
 def to_mp3(audio, mime, out_path, speed):
@@ -96,9 +146,11 @@ def to_mp3(audio, mime, out_path, speed):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="gemini-3.8-flash-tts")
+    ap.add_argument("--model", default="gemini-3.8-flash-lite-tts")
     ap.add_argument("--voice", default="Kore", help="예: Kore, Charon, Aoede, Puck ...")
     ap.add_argument("--speed", type=float, default=0.92, help="말 속도 배율 (1.0=원래, 0.92=조금 느리게)")
+    ap.add_argument("--mode", choices=["chapter", "paragraph"], default="chapter",
+                    help="chapter: 챕터마다 1회 요청(하루 한도 절약, 기본) / paragraph: 문단마다 요청")
     ap.add_argument("--only", type=int, help="이 챕터 번호(1~10)만 생성")
     ap.add_argument("--gap", type=float, default=12.0, help="요청 사이 대기(초). 무료 한도 보호용")
     ap.add_argument("--overwrite", action="store_true")
@@ -110,19 +162,51 @@ def main():
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     made = skipped = 0
+    warn = []
     for ci, ch in enumerate(CHAPTERS):
         if a.only and a.only != ci + 1:
             continue
-        for pi, text in enumerate(paras.get(ch, [])):
-            f = out / voice_name(ci, pi)
-            if f.exists() and not a.overwrite:
-                skipped += 1
-                continue
-            audio, mime = synth(text, a.model, a.voice)
-            to_mp3(audio, mime, f, a.speed)
-            made += 1
-            print(f"생성: {f.name}  ({len(text)}자)")
-            time.sleep(a.gap)
+        plist = paras.get(ch, [])
+        files = [out / voice_name(ci, pi) for pi in range(len(plist))]
+        if not a.overwrite and all(f.exists() for f in files):
+            skipped += len(files)
+            continue
+        if a.mode == "paragraph":
+            for pi, text in enumerate(plist):
+                f = files[pi]
+                if f.exists() and not a.overwrite:
+                    skipped += 1
+                    continue
+                audio, mime = synth(text, a.model, a.voice)
+                to_mp3(audio, mime, f, a.speed)
+                made += 1
+                print(f"생성: {f.name}  ({len(text)}자)")
+                time.sleep(a.gap)
+            continue
+        # 챕터 모드: 문단 사이에 빈 줄을 넣어 한 번에 요청 → 쉬는 구간으로 문단 분리
+        audio, mime = synth("\n\n".join(plist), a.model, a.voice)
+        whole = out / f"_chapter_{ci + 1:02d}.mp3"
+        to_mp3(audio, mime, whole, 1.0)           # 분리 전에는 원래 속도 유지
+        res = split_by_silence(whole, len(plist), files, a.speed)
+        if res is None:
+            warn.append(f"{ch} 문단 분리 실패 → 챕터 전체 파일만 저장: {whole.name}")
+            print(f"[경고] {ch} 문단 분리 실패. 챕터 파일 {whole.name} 만 저장했습니다.")
+        else:
+            whole.unlink(missing_ok=True)
+            for pi, f in enumerate(files):
+                d = duration_of(f)
+                cps = len(plist[pi]) / max(d, 0.1)
+                flag = ""
+                if cps > 9.0 or cps < 3.5:
+                    flag = "  ⚠ 길이 이상(잘림·누락 의심)"
+                    warn.append(f"{f.name}: {len(plist[pi])}자 / {d:.1f}초 = {cps:.1f}자/초")
+                print(f"생성: {f.name}  ({len(plist[pi])}자, {d:.1f}초, {cps:.1f}자/초){flag}")
+            made += len(files)
+        time.sleep(a.gap)
+    if warn:
+        print("\n[확인 필요]")
+        for w in warn:
+            print(" -", w)
     print(f"완료: 새로 {made}개, 건너뜀 {skipped}개 → {out}")
 
 
