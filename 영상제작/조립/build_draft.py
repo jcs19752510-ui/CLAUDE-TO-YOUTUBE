@@ -23,6 +23,7 @@ def gfx(name):
     p = G / f"{name}.mp4"
     if not p.exists(): raise SystemExit(f"그래픽 없음: {p}")
     return p, duration(p)
+MISSING = []
 segs, starts, t = [], {}, 0.0
 for ci, ch in enumerate(CHAPTERS):
     starts[ch] = t
@@ -30,10 +31,16 @@ for ci, ch in enumerate(CHAPTERS):
         p, d = gfx(g); segs.append(("gfx", str(p), d, None, None)); t += d
     for pi, text in enumerate(paras[ch]):
         vf = ROOT / "음성" / voice_name(ci, pi)
-        if not vf.exists(): raise SystemExit(f"음성 없음: {vf.name}")
-        d = duration(vf) + 0.5
+        if vf.exists():
+            d = duration(vf) + 0.5
+            vpath, vlabel = str(vf), ""
+        else:                       # 음성 미생성: 예상 길이(약 7자/초)의 무음으로 대체하고 카드에 표시
+            d = len(text) / 7.0 + 0.5
+            vpath, vlabel = None, "AI 음성:미생성(예상 길이)"
+            MISSING.append(voice_name(ci, pi))
         label = f"화면 녹화 자리:{SLOT[ch]}" if ch in SLOT else ""
-        segs.append(("card", dict(tag=f"{ch} {TITLES[ch]}", tm="", cap=text, src=label), d, str(vf), t)); t += d
+        label = "|".join(x for x in (label, vlabel) if x)
+        segs.append(("card", dict(tag=f"{ch} {TITLES[ch]}", tm="", cap=text, src=label), d, vpath, t)); t += d
         for g in AFTER.get((ch, pi), []):
             p, gd = gfx(g); segs.append(("gfx", str(p), gd, None, None)); t += gd
     for g in POST.get(ch, []):
@@ -48,8 +55,9 @@ files = []
 for i, s in enumerate(segs):
     out = S / f"s{i:03d}.mp4"
     if s[0] == "card":
-        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", f"{s[2]:.3f}", "-i", str(S / f"c{i:03d}.png"),
-               "-i", s[3], "-vf", "format=yuv420p", "-af", "apad", "-t", f"{s[2]:.3f}", "-shortest"] + VOPT + AOPT + [str(out)]
+        ain = ["-i", s[3]] if s[3] else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
+        cmd = ["ffmpeg", "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", f"{s[2]:.3f}", "-i", str(S / f"c{i:03d}.png")] + ain + \
+              ["-vf", "format=yuv420p", "-af", "apad", "-t", f"{s[2]:.3f}", "-shortest"] + VOPT + AOPT + [str(out)]
     else:
         cmd = ["ffmpeg", "-loglevel", "error", "-y", "-i", s[1], "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo",
                "-vf", f"scale={W}:{H},fps={FPS},format=yuv420p", "-t", f"{s[2]:.3f}", "-shortest"] + VOPT + AOPT + [str(out)]
@@ -73,4 +81,5 @@ for s in segs:
         a = t0 + dur * acc / tot; acc += len(x); b = t0 + dur * acc / tot
         cues.append(f"{n}\n{fmt_ts(a, True)} --> {fmt_ts(b, True)}\n{x}\n"); n += 1
 (OUT / "대사자막.srt").write_text("\n".join(cues), encoding="utf8")
+print(f"음성 미생성 문단 {len(MISSING)}개: " + (", ".join(MISSING[:6]) + (" ..." if len(MISSING)>6 else "")))
 print(f"완료: {dst.name}  총 {fmt_ts(duration(dst))} ({duration(dst):.0f}초)")
