@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(fonts/black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(fonts/noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(fonts/noto-sans-kr-korean-700-normal.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1280px;height:720px;background:#0f1422;color:#fff;font-family:NK,sans-serif;overflow:hidden}
+.bg{position:absolute;inset:0;background:radial-gradient(900px 600px at 85% 10%,#2b1a12 0%,#0f1422 60%)}
+.tag{position:absolute;left:36px;top:28px;font-family:BH;font-size:34px;color:#ff7a3d}
+.tm{position:absolute;right:36px;top:30px;font-size:28px;color:#9aa6c2;font-weight:700}
+.cap{position:absolute;left:90px;right:90px;top:150px;bottom:170px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;line-height:1.38;word-break:keep-all}
+.src{position:absolute;left:36px;bottom:30px;right:36px;display:flex;gap:14px;align-items:center}
+.pill{background:#ffffff18;border:2px solid #ffffff44;border-radius:30px;padding:8px 22px;font-size:24px;font-weight:700;color:#dfe6f7}
+.pill b{color:#ffd23f}
+.wm{position:absolute;right:36px;bottom:34px;font-size:22px;color:#6f7a96;font-weight:700}
+</style></head><body><div class="bg"></div>
+<div class="tag" id="tag"></div><div class="tm" id="tm"></div>
+<div class="cap" id="cap"></div>
+<div class="src" id="src"></div><div class="wm">무음 시안 · 구성 확인용</div>
+<script>
+const p=new URLSearchParams(location.search);
+document.getElementById('tag').textContent=p.get('tag')||'';
+document.getElementById('tm').textContent=p.get('tm')||'';
+const cap=document.getElementById('cap');cap.textContent=p.get('cap')||'';
+const n=(p.get('cap')||'').length;cap.style.fontSize=(n>150?40:n>100?46:n>60?52:60)+'px';
+document.getElementById('src').innerHTML=(p.get('src')||'').split('|').filter(Boolean).map(s=>{const [a,b]=s.split(':');return `<span class="pill">${a} <b>${b}</b></span>`}).join('');
+</script></body></html>
