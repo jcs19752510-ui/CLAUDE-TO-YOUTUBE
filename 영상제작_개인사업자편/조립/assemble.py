@@ -324,8 +324,7 @@ def main():
     ap.add_argument("--out", default=str(ROOT / "조립결과"))
     ap.add_argument("--script", default=str(ROOT / "10_AI음성_입력용_대본.md"))
     a = ap.parse_args()
-    global GFX
-    GFX = Path(a.gfx_dir)
+    globals()["GFX"] = Path(a.gfx_dir)
 
     ff, _ = tools()
     c = Ctx()

@@ -41,7 +41,10 @@ for ch, p0, p1 in PLAY_ORDER:
     bg = G / f"G{ci + 1:02d}.mp4"
     bg_len = None
     if bg.exists():
-        bg_len = duration(bg)
+        try:
+            bg_len = duration(bg)
+        except SystemExit:
+            WARN.append(f"배경 읽기 실패(단색 카드로 대체): {bg.name}")
     else:
         WARN.append(f"배경 없음(단색 카드로 대체): G{ci + 1:02d}.mp4")
     if p0 == 0:
