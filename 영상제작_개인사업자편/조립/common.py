@@ -135,9 +135,9 @@ def render_card(path, W, H, tag, caption, label=None, overlay=False):
         d.rounded_rectangle([int(W * 0.02), int(H * 0.03), int(W * 0.02) + d.textlength(tag, font=f_tag) + 36,
                              int(H * 0.03) + int(H * 0.08)], radius=16, fill=(0, 0, 0, 150))
     d.text((int(W * 0.03), int(H * 0.04)), tag, font=f_tag, fill=ORANGE)
-    box_w = int(W * 0.84)
-    box_h = int(H * (0.30 if overlay else 0.56))
-    size = int(H * (0.058 if overlay else 0.085))
+    box_w = int(W * (0.92 if overlay else 0.84))
+    box_h = int(H * (0.19 if overlay else 0.56))
+    size = int(H * (0.045 if overlay else 0.085))
     while True:
         font = ImageFont.truetype(str(FONTS / "NotoSansKR-Black.ttf"), size)
         lines = _wrap(caption, font, box_w, d)

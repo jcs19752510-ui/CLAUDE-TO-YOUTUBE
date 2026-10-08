@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from common import (CHAPTERS, PLAY_ORDER, ROOT as DEFAULT_ROOT, duration, fmt_ts,
                     parse_paragraphs, parse_titles, render_card, voice_name, tools)
+SHORT = {'①': '오프닝', '②': '설치', '③': '첫 실행', '④': '홍보 글', '⑤': '문의·주문', '⑥': '홈페이지', '⑦': '스킬', '⑧': '요약'}
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--root", default=str(DEFAULT_ROOT))
@@ -80,7 +81,7 @@ with tempfile.TemporaryDirectory(prefix="draft_") as td:
     for i, s in enumerate(segs):
         out = S / f"s{i:03d}.mp4"
         png = S / f"c{i:03d}.png"
-        tag = f"{s['ch']} {titles[s['ch']]}"
+        tag = f"{s['ch']} {SHORT.get(s['ch'], titles[s['ch']])}"
         ain = ["-i", s["voice"]] if s["voice"] else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
         dur = f"{s['dur']:.3f}"
         if s["bg"]:
