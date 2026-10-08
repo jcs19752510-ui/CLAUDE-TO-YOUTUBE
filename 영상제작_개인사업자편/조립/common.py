@@ -135,7 +135,8 @@ def render_card(path, W, H, tag, caption, label=None, overlay=False):
         d.rounded_rectangle([int(W * 0.02), int(H * 0.03), int(W * 0.02) + d.textlength(tag, font=f_tag) + 36,
                              int(H * 0.03) + int(H * 0.08)], radius=16, fill=(0, 0, 0, 150))
     d.text((int(W * 0.03), int(H * 0.04)), tag, font=f_tag, fill=ORANGE)
-    box_w = int(W * (0.92 if overlay else 0.84))
+    box_w = int(W * (0.78 if overlay else 0.84))
+    x_left = int(W * 0.03) if overlay else (W - box_w) // 2   # 자막 오버레이는 오른쪽을 비워 캐릭터 자리를 남긴다
     box_h = int(H * (0.19 if overlay else 0.56))
     size = int(H * (0.045 if overlay else 0.085))
     while True:
@@ -150,7 +151,7 @@ def render_card(path, W, H, tag, caption, label=None, overlay=False):
         d.rectangle([0, y - 16, W, H], fill=(0, 0, 0, 150))
     for ln in lines:
         w = d.textlength(ln, font=font)
-        d.text(((W - w) / 2, y), ln, font=font, fill=WHITE)
+        d.text((x_left + (box_w - w) / 2, y), ln, font=font, fill=WHITE)
         y += int(size * 1.4)
     if label:
         f_l = ImageFont.truetype(str(FONTS / "NotoSansKR-Bold.ttf"), int(H * 0.034))
