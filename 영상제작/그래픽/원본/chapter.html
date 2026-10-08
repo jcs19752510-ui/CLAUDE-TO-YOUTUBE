@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(fonts/black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(fonts/noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(fonts/noto-sans-kr-korean-700-normal.woff2)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;background:#0b1020;overflow:hidden;font-family:NK,sans-serif;color:#fff}
+.bg{position:absolute;inset:0;background:radial-gradient(1200px 800px at 85% 15%,#3a2012 0%,#0b1020 60%),#0b1020}
+@keyframes in{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pop{0%{opacity:0;transform:scale(.5)}70%{transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+.num{position:absolute;left:0;right:0;top:170px;text-align:center;font-family:BH;font-size:240px;line-height:1;color:#ff7a3d;text-shadow:0 10px 0 #000a;opacity:0;animation:pop .6s ease .1s forwards}
+.t{position:absolute;left:100px;right:100px;top:540px;text-align:center;font-family:BH;font-size:120px;line-height:1.1;text-shadow:0 8px 0 #000a;opacity:0;animation:in .7s ease .5s forwards}
+.line{position:absolute;left:660px;right:660px;top:480px;height:10px;background:#ffd23f;border-radius:5px;transform-origin:left;animation:grow .7s ease .4s both}
+.s{position:absolute;left:0;right:0;top:790px;text-align:center;font-size:56px;font-weight:700;color:#ffd23f;opacity:0;animation:in .7s ease 1s forwards}
+.box{position:absolute;left:260px;right:260px;top:250px;bottom:250px;border-radius:50px;border:6px solid #ffffff44;background:#ffffff10;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:60px;opacity:0;animation:in .7s ease .3s forwards}
+.box .h{font-family:BH;font-size:110px;color:#ffd23f;margin-bottom:40px}
+.box .p{font-size:62px;font-weight:900;line-height:1.5}
+.t.long{font-size:96px;line-height:1.18;text-wrap:balance;word-break:keep-all;top:520px}
+</style></head><body><div class="bg"></div>
+<div id="ch"><div class="num" id="n"></div><div class="line"></div><div class="t" id="t"></div><div class="s" id="s"></div></div>
+<div class="box" id="box"><div class="h" id="bh"></div><div class="p" id="bp"></div></div>
+<script>
+const q=new URLSearchParams(location.search);
+if(q.get('k')==='box'){document.getElementById('ch').style.display='none';const b=document.getElementById('box');b.style.display='flex';document.getElementById('bh').textContent=q.get('h');document.getElementById('bp').innerHTML=q.get('p').replace(/\|/g,'<br>')}
+else{document.getElementById('n').textContent=q.get('n');const tt=q.get('t');const te=document.getElementById('t');te.textContent=tt;if(tt.length>13)te.classList.add('long');document.getElementById('s').textContent=q.get('s')||''}
+</script></body></html>
