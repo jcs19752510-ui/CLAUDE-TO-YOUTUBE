@@ -1,0 +1,59 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
+@font-face{font-family:BH;src:url(black-han-sans-korean-400-normal.woff2)}
+@font-face{font-family:NK;font-weight:900;src:url(noto-sans-kr-korean-900-normal.woff2)}
+@font-face{font-family:NK;font-weight:700;src:url(noto-sans-kr-korean-700-normal.woff2)}
+*{box-sizing:border-box;margin:0}
+body{width:1280px;height:720px;overflow:hidden;font-family:NK,sans-serif}
+.t{position:relative;width:1280px;height:720px;overflow:hidden}
+.big{font-family:BH;line-height:1.02;letter-spacing:-2px}
+.badge{position:absolute;font-family:BH;border-radius:14px;padding:6px 22px}
+/* A: 남색, 파일 7개 폴더 */
+body.A .t{background:radial-gradient(900px 600px at 80% 20%,#27407f 0%,#0f1730 60%,#0a1022 100%)}
+.A .l1{position:absolute;left:60px;top:70px;font-size:128px;color:#fff;text-shadow:0 6px 0 #0007}
+.A .l2{position:absolute;left:60px;top:250px;font-size:168px;color:#ffd21f;text-shadow:0 8px 0 #7a5a00,0 14px 30px #0009}
+.A .l3{position:absolute;left:66px;top:480px;font-family:NK;font-weight:900;font-size:56px;color:#cfd8f5}
+.A .badge{left:60px;bottom:48px;background:#ff3b30;color:#fff;font-size:48px}
+.folder{position:absolute;right:44px;top:170px;width:330px;height:400px}
+.folder .back{position:absolute;inset:60px 0 0 0;background:#f0b323;border-radius:22px;box-shadow:0 20px 40px #0008}
+.folder .tab{position:absolute;left:0;top:20px;width:150px;height:60px;background:#f0b323;border-radius:18px 18px 0 0}
+.folder .file{position:absolute;left:22px;width:286px;height:42px;background:#fff;border-radius:10px;font:700 26px NK;color:#26324f;padding:6px 16px;box-shadow:0 3px 0 #0003;font-size:22px}
+.folder .front{position:absolute;inset:216px 0 0 0;background:#ffd04d;border-radius:20px;display:flex;align-items:flex-end;justify-content:flex-end;padding:20px 28px}
+.folder .front b{font:400 120px BH;color:#7a5a00}
+/* B: 밝은 회색, 체크 3개 */
+body.B .t{background:linear-gradient(160deg,#f4f5f8,#dfe3ec)}
+.B .l1{position:absolute;left:0;right:0;text-align:center;top:40px;font-size:150px;color:#111}
+.B .l2{position:absolute;left:0;right:0;text-align:center;top:205px;font-size:190px;color:#111}
+.B .l2 em{font-style:normal;color:#ff7a00}
+.B .checks{position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center;gap:26px}
+.B .ck{width:340px;background:#fff;border:5px solid #111;border-radius:22px;padding:18px 20px;text-align:center;box-shadow:0 8px 0 #0002}
+.B .ck i{display:inline-block;width:64px;height:64px;line-height:64px;border-radius:50%;background:#1fae5b;color:#fff;font:900 44px NK;font-style:normal}
+.B .ck b{display:block;font:900 42px NK;color:#111;margin-top:6px}
+.B .badge{right:48px;top:44px;background:#111;color:#fff;font-size:44px}
+/* C: 주황, 쿠키 가게 페이지 */
+body.C .t{background:linear-gradient(135deg,#ff8a1f,#ff6a00)}
+.C .l1{position:absolute;left:56px;top:60px;font-size:150px;color:#fff;-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 #0006}
+.C .l2{position:absolute;left:56px;top:240px;font-size:150px;color:#fff;-webkit-text-stroke:10px #111;paint-order:stroke fill;text-shadow:0 8px 0 #0006}
+.C .l3{position:absolute;left:62px;top:470px;font-family:NK;font-weight:900;font-size:50px;color:#111;background:#ffe14a;padding:4px 18px;border-radius:10px}
+.page{position:absolute;right:50px;top:92px;width:420px;height:540px;background:#fff;border:8px solid #111;border-radius:20px;box-shadow:0 18px 0 #0004;overflow:hidden;transform:rotate(3deg)}
+.page .h{background:#7a4b22;color:#fff;font:400 40px BH;padding:16px 22px}
+.page .c{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px}
+.page .c div{background:#f6e7d3;border-radius:12px;height:120px;position:relative}
+.page .c div:before{content:"";position:absolute;left:50%;top:50%;width:62px;height:62px;margin:-31px;border-radius:50%;background:#c98a4a;box-shadow:inset 0 -8px 0 #0002}
+.page .c div:nth-child(2):before{background:#8aa35a}
+.page .c div:nth-child(3):before{background:#d9a35a}
+.page .btn{margin:6px 18px;background:#ff3b30;color:#fff;font:900 36px NK;text-align:center;padding:12px;border-radius:12px}
+.page .a{margin:14px 18px;font:700 26px NK;color:#5a3a1a}
+.C .badge{left:62px;bottom:46px;background:#111;color:#fff;font-size:46px}
+</style></head><body>
+<div class="t" id="A"><div class="l1 big">말 몇 줄로</div><div class="l2 big">홍보글 7개</div><div class="l3">클로드 코드 · 개인사업 입문</div>
+ <div class="folder"><div class="tab"></div><div class="back"></div>
+  <div class="file" style="top:72px">홍보글_1일차</div><div class="file" style="top:120px;left:32px;width:276px">홍보글_2일차</div><div class="file" style="top:168px">홍보글_3일차</div>
+  <div class="front"><b>7</b></div></div>
+ <div class="badge">27분</div></div>
+<div class="t" id="B"><div class="l1 big">설치부터</div><div class="l2 big">자동화 <em>3개</em></div>
+ <div class="checks"><div class="ck"><i>✓</i><b>홍보 글</b></div><div class="ck"><i>✓</i><b>문의 답변</b></div><div class="ck"><i>✓</i><b>홈페이지</b></div></div>
+ <div class="badge">27분</div></div>
+<div class="t" id="C"><div class="l1 big">코딩 0줄</div><div class="l2 big">가게 자동화</div><div class="l3">클로드 코드 입문</div>
+ <div class="page"><div class="h">하루쿠키</div><div class="c"><div></div><div></div><div></div><div></div></div><div class="a">알레르기 안내 · 가격 · 주문</div><div class="btn">주문하기</div></div>
+ <div class="badge">27분</div></div>
+</body></html>
