@@ -18,6 +18,8 @@ SHORT = {'①': '오프닝', '②': '설치', '③': '첫 실행', '④': '홍�
 ap = argparse.ArgumentParser()
 ap.add_argument("--root", default=str(DEFAULT_ROOT))
 ap.add_argument("--plan", action="store_true")
+ap.add_argument("--sync-cards", action="store_true", help="카드를 대사(문단)에 맞춰 바꿔 보여 준다(카드배치.json 기준, 정지 이미지)")
+ap.add_argument("--end-card", type=float, default=20.0, help="--sync-cards 일 때 끝에 붙이는 엔드카드 길이(초), 0이면 안 붙임")
 args = ap.parse_args()
 ROOT = Path(args.root)
 G = ROOT / "그래픽" / "영상_mp4"
@@ -32,6 +34,20 @@ paras = parse_paragraphs(SCRIPT)
 for ch in CHAPTERS:
     if not paras.get(ch):
         raise SystemExit(f"[오류] {ch} 문단을 대본에서 찾지 못했습니다: {SCRIPT}")
+
+import json
+CARDMAP = json.loads((Path(__file__).resolve().parent / "카드배치.json").read_text(encoding="utf-8")) if args.sync_cards else {}
+PNGDIR = ROOT / "그래픽" / "이미지_png"
+def card_for(ch, pi):
+    """문단 pi 에서 보여 줄 카드 PNG 경로. 카드배치.json 의 시작 문단 중 pi 이하에서 가장 큰 것."""
+    m = CARDMAP.get(ch, {})
+    best = None
+    for name, st in sorted(m.items(), key=lambda kv: kv[1]):
+        if st <= pi:
+            best = name
+    if best is None and m:
+        best = sorted(m.items(), key=lambda kv: kv[1])[0][0]
+    return PNGDIR / f"{best}.png" if best else None
 
 WARN, MISSING = [], []
 segs, starts, t = [], {}, 0.0      # seg = dict(ch, ci, pi, text, dur, voice, bg, bg_off)
@@ -60,7 +76,8 @@ for ch, p0, p1 in PLAY_ORDER:
             d, vpath = len(plist[pi]) / EST_CPS + PAD, None
             MISSING.append(name)
         segs.append(dict(ch=ch, ci=ci, pi=pi, text=plist[pi], dur=d, voice=vpath, t0=t,
-                         bg=str(bg) if bg_len else None, bg_off=(ch_off % bg_len) if bg_len else 0.0))
+                         bg=str(bg) if bg_len else None, bg_off=(ch_off % bg_len) if bg_len else 0.0,
+                         card=str(card_for(ch, pi)) if args.sync_cards and card_for(ch, pi) else None))
         t += d
         ch_off += d
 
@@ -84,7 +101,15 @@ with tempfile.TemporaryDirectory(prefix="draft_") as td:
         tag = f"{s['ch']} {SHORT.get(s['ch'], titles[s['ch']])}"
         ain = ["-i", s["voice"]] if s["voice"] else ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo"]
         dur = f"{s['dur']:.3f}"
-        if s["bg"]:
+        if s.get("card"):
+            render_card(png, W, H, tag, s["text"], overlay=True)
+            newcard = (i == 0) or (segs[i - 1].get("card") != s["card"])
+            fade = f",fade=t=in:st=0:d=0.35" if newcard else ""
+            cmd = [FF, "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", dur, "-i", s["card"],
+                   "-loop", "1", "-framerate", str(FPS), "-t", dur, "-i", str(png)] + ain + \
+                  ["-filter_complex", f"[0:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},format=rgba{fade}[b];"
+                   f"[b][1:v]overlay=0:0,format=yuv420p[v]", "-map", "[v]", "-map", "2:a", "-af", "apad", "-t", dur] + VOPT + AOPT + [str(out)]
+        elif s["bg"]:
             render_card(png, W, H, tag, s["text"], overlay=True)
             cmd = [FF, "-loglevel", "error", "-y", "-stream_loop", "-1", "-ss", f"{s['bg_off']:.3f}", "-i", s["bg"],
                    "-loop", "1", "-framerate", str(FPS), "-i", str(png)] + ain + \
@@ -98,6 +123,16 @@ with tempfile.TemporaryDirectory(prefix="draft_") as td:
         if rr.returncode:
             sys.exit(f"실패 {i}: {rr.stderr[-400:]}")
         files.append(f"file '{out}'")
+    if args.sync_cards and args.end_card > 0:
+        ec = PNGDIR / (CARDMAP.get("엔드카드", "8_05_엔드카드") + ".png")
+        if ec.exists():
+            out = S / "s_end.mp4"
+            rr = subprocess.run([FF, "-loglevel", "error", "-y", "-loop", "1", "-framerate", str(FPS), "-t", f"{args.end_card:.3f}", "-i", str(ec),
+                                 "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-vf", f"scale={W}:{H},format=yuv420p,fade=t=in:st=0:d=0.35",
+                                 "-t", f"{args.end_card:.3f}", "-shortest"] + VOPT + AOPT + [str(out)], capture_output=True, text=True)
+            if rr.returncode:
+                sys.exit("엔드카드 실패: " + rr.stderr[-300:])
+            files.append(f"file '{out}'")
     (S / "list.txt").write_text("\n".join(files))
     OUT = ROOT / "조립결과"
     OUT.mkdir(exist_ok=True)
