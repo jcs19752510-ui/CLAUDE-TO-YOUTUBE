@@ -41,7 +41,7 @@ from common import CHAPTERS, ROOT, parse_paragraphs, tools, voice_name  # noqa: 
 BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 
 
-def synth(text, model, voice, tries=6):
+def synth(text, model, voice, tries=2):
     """문장 하나를 음성(WAV 바이트)으로 만든다. 한도(429)에 걸리면 기다렸다 재시도."""
     body = {
         "contents": [{"parts": [{"text": text}]}],
