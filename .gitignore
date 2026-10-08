@@ -20,3 +20,4 @@ __pycache__/
 
 # CI 헤드리스 실행 로그 (automation/run-harness-agent.sh 산출물)
 docs/harness/_ci-logs/
+영상제작_개인사업자편/조립결과/_avatar_tmp/
