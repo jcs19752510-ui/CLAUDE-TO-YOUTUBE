@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """10_AI음성_입력용_대본.md 에서 '촬영용 낭독문'(얼굴 출연 구간 표시 포함)을 만든다. 직접 고치지 말고 이 스크립트로 다시 만든다."""
-import re
+import re, sys
 from pathlib import Path
 R = Path(__file__).resolve().parent
+sys.path.insert(0, str(R)); from 문체변환 import sents, formal
 t = (R / "10_AI음성_입력용_대본.md").read_text(encoding="utf-8")
 parts = re.split(r"\n## ([①-⑧]) ([^\n]*?)\s*→[^\n]*\n", t)
 P = {}
@@ -24,7 +25,7 @@ for ch, (title, paras) in P.items():
         for c, a, b, n, nm in FACE:
             if c == ch and pi == a:
                 out.append(f"▶ 얼굴 촬영 {n} 시작 — {nm}\n")
-        out.append(x + "\n")
+        out.append(" ".join(formal(z) for z in sents(x)) + "\n")
         for c, a, b, n, nm in FACE:
             if c == ch and pi == b:
                 out.append(f"■ 얼굴 촬영 {n} 끝\n")
